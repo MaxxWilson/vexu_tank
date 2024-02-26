@@ -74,13 +74,37 @@ void competition_initialize()
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
 using namespace Auton;
 void autonomous()
 {
+
+	climbup.set_value(true);
+	pros::delay(1000);
+	climbup.set_value(false);
+	pros::delay(500);
+	driveForward(60, 0.5, 0.5);
+	intakeMotorA.move_velocity(150);
+	driveForward(30, 0.5, 0.5);
+	pros::delay(10000);
+	// wingL.set_value(true);
+	driveForward(-10, 0.5, 0.5);
+
+	return;
+	pros::delay(500);
+	driveForward(3, 0.5, 0.5);
+	pros::delay(100);
+	intake.move_velocity(0);
+	pros::delay(100);
+	turnRight(180, 0.1, 0.1);
+	pros::delay(100);
+
+	driveForward(25, 0.5, 0.5);
+	return;
 	setup();
 	driveBackward(4.0, 0.5, 0.5);
 	pros::delay(100);
-	roller();
+	// roller();
 	driveForward(6.0, 0.5, 0.5);
 	pros::delay(100);
 	turnRight(90.0, 0.1, 0.1);
@@ -94,7 +118,7 @@ void autonomous()
 	turnLeft(90.0, 0.1, 0.1);
 	driveBackward(8.0, 0.5, 0.5);
 	pros::delay(100);
-	roller();
+	// roller();
 	driveForward(4.0, 0.5, 0.5);
 }
 
@@ -144,87 +168,65 @@ void opcontrol()
 		bool buttonA = master.get_digital(DIGITAL_A);
 		bool buttonB = master.get_digital(DIGITAL_B);
 
-		bool switchPressed = catapultSwitch.get_value();
-		// velocity is in rpm
-		// double leftVelocity = (joystickLeftY) / 127.0 * RPM / 2;
-		// double rightVelocity = (joystickRightY) / 127.0 * RPM / 2;
-		// leftDrive.move_velocity(leftVelocity);
-		// rightDrive.move_velocity(rightVelocity);
+		// bool switchPressed = wingL.get_value();
+		//  velocity is in rpm
+		//  double leftVelocity = (joystickLeftY) / 127.0 * RPM / 2;
+		//  double rightVelocity = (joystickRightY) / 127.0 * RPM / 2;
+		//  leftDrive.move_velocity(leftVelocity);
+		//  rightDrive.move_velocity(rightVelocity);
 
 		// drive
 		const int MAXVOLTAGE = 12000;
-		double leftSpeed = (joystickLeftY + joystickRightX) / 127.0; //[0,1]
-		double rightSpeed = (joystickLeftY - joystickRightX) / 127.0;//[0,1]
+		double leftSpeed = (joystickLeftY + joystickRightX) / 127.0;  //[0,1]
+		double rightSpeed = (joystickLeftY - joystickRightX) / 127.0; //[0,1]
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 		leftDrive.move_voltage(leftVoltage);
 		rightDrive.move_voltage(rightVoltage);
 
-		// if (buttonA)
-		// {
-		// 	catapultMotor.move_velocity(100);
-		// } /*else if (buttonB){
-		// 	 catapultMotor.move_velocity(-100);
+		wingL.set_value(master.get_digital(DIGITAL_L2));
+		wingR.set_value(master.get_digital(DIGITAL_R2));
 
-		//  } */
-		// else
-		// {
-		// 	catapultMotor.brake();
-		// }
-
-		if (!switchPressed && !catapultSeated)
-		{
-			catapultMotor.move_velocity(100);
-
-			pros::lcd::set_text(2, std::to_string(buttonA));
-			pros::lcd::set_text(1, "catapult is up");
-		}
-		else
-		{
-			catapultSeated = true;
-			if (buttonA)
-			{
-				catapultMotor.move_velocity(30);
-				catapultSeated = false;
-			}
-			else
-			{
-				catapultMotor.brake();
-			}
-			pros::lcd::set_text(1, "catapult is down");
-		}
-
-		bool buttonR1 = master.get_digital(DIGITAL_R1);
-		bool buttonR2 = master.get_digital(DIGITAL_R2);
-		if (buttonR2)
+		bool buttonR1 = master.get_digital(DIGITAL_L1);
+		bool buttonR2 = master.get_digital(DIGITAL_R1);
+		if (buttonR1)
 		{
 			intakeMotorA.move_velocity(150);
-			intakeMotorB.move_velocity(200);
 		}
-		else if (buttonR1)
+		else if (buttonR2)
 		{
 			intakeMotorA.move_velocity(-150);
-			intakeMotorB.move_velocity(-200);
 		}
 		else
 		{
 			intake.brake();
 		}
 
-		bool buttonL1 = master.get_digital(DIGITAL_L1);
-		bool buttonL2 = master.get_digital(DIGITAL_L2);
-		if (buttonL2)
+		static bool upordown = false;
+		static bool updown = false;
+		if (master.get_digital(DIGITAL_A) && !updown)
 		{
-			rollerMotor.move_velocity(100);
+			upordown ^= 1;
+			updown = true;
 		}
-		else if (buttonL1)
+		else if (!master.get_digital(DIGITAL_A))
 		{
-			rollerMotor.move_velocity(-100);
+			updown = false;
 		}
-		else
+		climbup.set_value(upordown);
+
+		static bool releasebool = false;
+		static bool releasebtn = false;
+		if (master.get_digital(DIGITAL_Y) && !releasebtn)
 		{
-			rollerMotor.brake();
+			releasebool ^= 1;
+			releasebtn = true;
 		}
+		else if (!master.get_digital(DIGITAL_Y))
+		{
+			releasebtn = false;
+		}
+		release.set_value(releasebool);
 
 		pros::delay(20);
 	}

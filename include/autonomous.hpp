@@ -23,5 +23,5 @@ namespace Auton
     void turnLeft(double angle, double max_speed, double acceleration);
     void turnLeftArc(double angle, double max_speed, double acceleration);
     void turnRight(double angle, double max_speed, double acceleration);
-    void roller();
+    //void roller();
 }

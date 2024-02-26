@@ -30,7 +30,10 @@ extern pros::Motor catapultMotor;
 extern std::vector<pros::Motor> motorList;
 
 //sensors
-extern pros::ADIDigitalIn catapultSwitch;
+extern pros::ADIDigitalOut wingL;
+extern pros::ADIDigitalOut wingR;
+extern pros::ADIDigitalOut release;
+extern pros::ADIDigitalOut climbup;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
