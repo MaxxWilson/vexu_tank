@@ -9,6 +9,7 @@ namespace Auton
     }
     double velocity(double time, double dist, double max_speed, double acceleration)
     {
+        dist *= GEAR_RATIO;
         max_speed *= MAX_SPEED;
         acceleration *= MAX_SPEED;
         double velocity = 0;

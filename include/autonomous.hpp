@@ -6,6 +6,7 @@
 #endif
 #include <cmath>
 
+const double GEAR_RATIO = 48.0 / 36.0;
 const double RPS = RPM / 60;                 // rotations / sec
 const double CIRC = M_PI * 3;                // in
 const double MAX_SPEED = RPS * CIRC;         // in / sec
