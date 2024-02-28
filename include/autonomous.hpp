@@ -13,7 +13,8 @@ const double MAX_SPEED = RPS * CIRC;         // in / sec
 const double WHEEL_DIST_S = 9.5;             // (in) sideways
 const double WHEEL_DIST_F = 10;              // (in) forward
 const double WHEEL_R = WHEEL_DIST_S / 2;     // sqrt(WHEEL_DIST_S * WHEEL_DIST_S + WHEEL_DIST_F * WHEEL_DIST_F);
-const double WHEEL_R_ARC = WHEEL_DIST_S / 2; // sqrt(4 * WHEEL_DIST_S * WHEEL_DIST_S + WHEEL_DIST_F * WHEEL_DIST_F);
+const double WHEEL_R_ARC = WHEEL_DIST_S / 2;
+const double TILE_LENGTH = 23.32; // sqrt(4 * WHEEL_DIST_S * WHEEL_DIST_S + WHEEL_DIST_F * WHEEL_DIST_F);
 
 namespace Auton
 {
@@ -25,4 +26,9 @@ namespace Auton
     void turnLeftArc(double angle, double max_speed, double acceleration);
     void turnRight(double angle, double max_speed, double acceleration);
     void roller();
+    
+    // wisco-autons
+    void process_match_loads(int num_match_loads, double max_speed);
+    void push_into_goal(double turning_radius, double line_path, double max_speed);
+    void push_across_field(double turning_radius, double line_path, double max_speed);
 }

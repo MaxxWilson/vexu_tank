@@ -197,4 +197,80 @@ namespace Auton
         pros::delay(400);
         rollerMotor.brake();
     }
+
+    // Specific methods for wisco-autons
+    void process_match_loads(int num_match_loads, double max_speed){
+        for(int match_load = 0; match_load < num_match_loads; match_load++){
+            driveBackward(14.0, max_speed, 0.5);
+            pros::delay(100);
+            driveForward(14.0, max_speed, 0.5);
+            pros::delay(100);
+        }
+    }
+
+    /**
+     * Assuming starting from blue diagonal bar
+    */
+    void push_across_field(double turning_radius, double line_path, double max_speed){
+        double time = 0;
+        double r_speed = 0;
+        double l_speed = 0;
+        double direction = 1;
+        
+        // Caluclate arc length of left and right side 
+        double l_arc = (turning_radius + WHEEL_DIST_S * 0.5) * atan(line_path / (turning_radius + WHEEL_DIST_S * 0.5));
+        double r_arc = (turning_radius - WHEEL_DIST_S * 0.5) * atan(line_path / (turning_radius - WHEEL_DIST_S * 0.5));
+        
+        // Turn while pushing match loads
+        while (l_speed >= 0)
+        {
+            r_speed = velocity(time, l_arc, max_speed, 0.5);
+            l_speed = velocity(time, r_arc, max_speed, 0.5);
+            leftDrive.move_velocity(direction * l_speed);
+            rightDrive.move_velocity(direction * r_speed);
+            time += 0.020;
+            pros::delay(20);
+        }
+
+        // Push till reach opposing diagonal bar
+        driveForward(TILE_LENGTH * 4, max_speed, 0.5);
+
+        leftDrive.brake();
+        rightDrive.brake();
+    }
+
+    void push_into_goal(double turning_radius, double line_path, double max_speed){
+        driveBackward(4.0, max_speed, 0.5);
+        pros::delay(100);
+        driveForward(4.0, max_speed, 0.5);
+        pros::delay(100);
+        
+        double time = 0;
+        double r_speed = 0;
+        double l_speed = 0;
+        double direction = 1;
+        
+        // Caluclate arc length of left and right side 
+        double l_arc = (turning_radius + WHEEL_DIST_S * 0.5) * atan(line_path / (turning_radius + WHEEL_DIST_S * 0.5));
+        double r_arc = (turning_radius - WHEEL_DIST_S * 0.5) * atan(line_path / (turning_radius - WHEEL_DIST_S * 0.5));
+        
+        // Turn while pushing match loads
+        while (l_speed >= 0)
+        {
+            r_speed = velocity(time, l_arc, max_speed, 0.5);
+            l_speed = velocity(time, r_arc, max_speed, 0.5);
+            leftDrive.move_velocity(direction * l_speed);
+            rightDrive.move_velocity(direction * r_speed);
+            time += 0.020;
+            pros::delay(20);
+        }
+
+        int num_pushes = 5;
+        for(int push = 0; push < num_pushes; push++){
+            driveBackward(14.0, max_speed, 0.5);
+            pros::delay(100);
+            driveForward(14.0, max_speed, 0.5);
+            pros::delay(100);
+        }
+    }
 }

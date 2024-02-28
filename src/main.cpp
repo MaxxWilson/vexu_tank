@@ -78,24 +78,13 @@ using namespace Auton;
 void autonomous()
 {
 	setup();
-	driveBackward(4.0, 0.5, 0.5);
-	pros::delay(100);
-	roller();
-	driveForward(6.0, 0.5, 0.5);
-	pros::delay(100);
-	turnRight(90.0, 0.1, 0.1);
-	pros::delay(100);
-	driveForward(4 * 24.0 * 4.0 / 3.0, 0.5, 0.5);
-	pros::delay(100);
-	turnLeft(90.0, 0.1, 0.1);
-	pros::delay(100);
-	driveForward(4 * 24.0 * 4.0 / 3.0 - 2.0, 0.3, 0.3);
-	pros::delay(100);
-	turnLeft(90.0, 0.1, 0.1);
-	driveBackward(8.0, 0.5, 0.5);
-	pros::delay(100);
-	roller();
-	driveForward(4.0, 0.5, 0.5);
+	double max_speed = 0.5;
+	double turning_radius = 5; // in
+	// do match loading oscillations for x amount of match loads
+	process_match_loads(5, max_speed);
+	push_across_field(turning_radius, 15, max_speed);
+	push_into_goal(turning_radius, TILE_LENGTH + 5, max_speed);
+
 }
 
 /**
