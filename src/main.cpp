@@ -71,25 +71,56 @@ void competition_initialize(){
 using namespace Auton;
 void autonomous(){
 	setup();
+	intakeMotorA.move_voltage(12000);
 	lift.set_value(true);
 	pros::delay(100);
 	lift.set_value(false);
 	pros::delay(100);
 	wingR.set_value(true);
-	process_match_loads(10);
-	wingR.set_value(true);
-	arcTurnPD(-60.0, 1.0, turn_direction_e_t::RIGHT, 3.0);
-
-	// NOT BAD ARCS
-	// arcTurnCubic(-108, 0.75, turn_direction_e_t::LEFT);
-	// pros::delay(1000);
-	// arcTurnCubic(105, 0.75, turn_direction_e_t::RIGHT);
-
-	// do match loading oscillations for x amount of match loads
-	// process_match_loads(5, max_speed);
-	// push_across_field(turning_radius, 15, max_speed);
-	// turnLeftArc(, double max_speed, double acceleration);
-	// push_into_goal(turning_radius, TILE_LENGTH + 5, max_speed);
+	pros::delay(500);
+	intakeMotorA.move_voltage(500);
+	process_match_loads(22);
+	wingR.set_value(false);
+	driveForwardCubic(-2, 0.2);
+	pros::delay(500);
+	arcTurnPD(80.0, 2.0, turn_direction_e_t::RIGHT, 5.0);
+	pros::delay(500);
+	driveForwardCubic(10, 0.5);
+	pros::delay(500);
+	intakeMotorA.move_voltage(-12000);
+	pros::delay(500);
+	leftDrive.move_voltage(10000);
+	rightDrive.move_voltage(10000);
+	pros::delay(250);
+	leftDrive.move_voltage(0);
+	rightDrive.move_voltage(0);
+	pros::delay(500);
+	driveForwardCubic(-8, 0.3);
+	pros::delay(500);
+	arcTurnPD(-56.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
+	pros::delay(500);
+	// wingR.set_value(true);
+	driveForwardCubic(-8, 0.4);
+	pros::delay(500);
+	arcTurnPD(-56.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
+	pros::delay(500);
+	driveForwardCubic(-10, 0.4);
+	pros::delay(500);
+	arcTurnPD(-10.0, 0.5, turn_direction_e_t::RIGHT, 3.0);
+	pros::delay(500);
+	driveForwardCubic(-70, 1.1);
+	pros::delay(500);
+	lift.set_value(true);
+	pros::delay(500);
+	auto start_time = pros::millis();
+	while(!climb_switch.get_value() && (pros::millis() - start_time) < 3000){
+		leftDrive.move_voltage(10000);
+		rightDrive.move_voltage(10000);
+	}
+	lift.set_value(false);
+	leftDrive.move_voltage(0);
+	rightDrive.move_voltage(0);
+	pros::delay(500);
 }
 
 /**
