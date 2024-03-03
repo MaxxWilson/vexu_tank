@@ -504,9 +504,9 @@ void roller(){
 // Specific methods for wisco-autons
 void process_match_loads(int num_match_loads){
 	for(int match_load = 0; match_load < num_match_loads; match_load++){
-		driveForwardCubic(-9.0, 0.27);
+		driveForwardCubic(-9.0, 0.25);
 		pros::delay(300);
-		driveForwardCubic(8.6, 0.27);
+		driveForwardCubic(8.9, 0.25);
 		pros::delay(750);
 	}
 }

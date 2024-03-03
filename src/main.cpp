@@ -71,24 +71,24 @@ void competition_initialize(){
 using namespace Auton;
 void autonomous(){
 	setup();
-	intakeMotorA.move_voltage(12000);
+	intakeMotorA.move_voltage(-12000);
 	lift.set_value(true);
 	pros::delay(100);
 	lift.set_value(false);
 	pros::delay(100);
 	wingR.set_value(true);
-	pros::delay(500);
-	intakeMotorA.move_voltage(500);
-	process_match_loads(22);
+	pros::delay(1000);
+	intakeMotorA.move_voltage(-500);
+	process_match_loads(23);
+	// process_match_loads(1);
 	wingR.set_value(false);
-	driveForwardCubic(-2, 0.2);
+	arcTurnPD(130.0, 2.0, turn_direction_e_t::RIGHT, 5.0);
 	pros::delay(500);
-	arcTurnPD(80.0, 2.0, turn_direction_e_t::RIGHT, 5.0);
+	driveForwardCubic(8, 0.45);
 	pros::delay(500);
-	driveForwardCubic(10, 0.5);
+	intakeMotorA.move_voltage(12000);
 	pros::delay(500);
-	intakeMotorA.move_voltage(-12000);
-	pros::delay(500);
+	intakeMotorA.move_voltage(0);
 	leftDrive.move_voltage(10000);
 	rightDrive.move_voltage(10000);
 	pros::delay(250);
@@ -97,23 +97,23 @@ void autonomous(){
 	pros::delay(500);
 	driveForwardCubic(-8, 0.3);
 	pros::delay(500);
-	arcTurnPD(-56.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
+	arcTurnPD(-60.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
 	pros::delay(500);
 	// wingR.set_value(true);
 	driveForwardCubic(-8, 0.4);
 	pros::delay(500);
-	arcTurnPD(-56.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
+	arcTurnPD(-60.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
 	pros::delay(500);
-	driveForwardCubic(-10, 0.4);
+	driveForwardCubic(-20, 0.4);
 	pros::delay(500);
-	arcTurnPD(-10.0, 0.5, turn_direction_e_t::RIGHT, 3.0);
+	arcTurnPD(-20.0, 0.5, turn_direction_e_t::RIGHT, 6.0);
 	pros::delay(500);
 	driveForwardCubic(-70, 1.1);
 	pros::delay(500);
 	lift.set_value(true);
 	pros::delay(500);
 	auto start_time = pros::millis();
-	while(!climb_switch.get_value() && (pros::millis() - start_time) < 3000){
+	while(!climb_switch.get_value() && (pros::millis() - start_time) < 5000){
 		leftDrive.move_voltage(10000);
 		rightDrive.move_voltage(10000);
 	}
@@ -139,6 +139,7 @@ void autonomous(){
 void opcontrol(){
 	bool catapultSeated = false;
 	double last_climb_switch_time = pros::millis();
+	bool willie_driving = true;
 	// autonomous();
 	while(true){
 		// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
@@ -164,27 +165,33 @@ void opcontrol(){
 		bool buttonA = master.get_digital(DIGITAL_A);
 		bool buttonB = master.get_digital(DIGITAL_B);
 
+		if(buttonA && buttonB && willie_driving){
+			willie_driving = false;
+		}
+
 		// drive
 		const int MAXVOLTAGE = 12000;
 		double leftSpeed = joystickLeftY / 127.0;  // [0,1]
 		double rightSpeed = joystickRightY / 127.0; // [0,1]
+		if(willie_driving){
+			leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
+			rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
+		}
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 
-		if(master.get_digital(DIGITAL_LEFT)){
-			leftVoltage *= 0.5;
-			rightVoltage *= 0.5;
-			leftVoltage = rightVoltage;
-		}
-
 		wingR.set_value(master.get_digital(DIGITAL_R1));
 
-		leftDrive.move_voltage(leftVoltage);
-		rightDrive.move_voltage(rightVoltage);
 
 		bool buttonL2 = master.get_digital(DIGITAL_L2);
 		bool buttonR2 = master.get_digital(DIGITAL_R2);
-		if(buttonL2){
+		if(buttonL2 && buttonR2){
+			leftVoltage *= 0.5;
+			rightVoltage *= 0.5;
+			leftVoltage = rightVoltage;
+			intake.brake();
+		}
+		else if(buttonL2){
 			intakeMotorA.move_voltage(12000);
 		}
 		else if(buttonR2){
@@ -194,6 +201,9 @@ void opcontrol(){
 			intake.brake();
 		}
 
+		leftDrive.move_voltage(leftVoltage);
+		rightDrive.move_voltage(rightVoltage);
+
 		static bool climbed = false;
 
 		if(master.get_digital(DIGITAL_L1)){
@@ -202,7 +212,7 @@ void opcontrol(){
 				climbed = true;
 				last_climb_switch_time = pros::millis();
 			}
-			else if(pros::millis() - last_climb_switch_time > 500){
+			else if(pros::millis() - last_climb_switch_time > 3000){
 				lift.set_value(true);
 				climbed = false;
 			}
