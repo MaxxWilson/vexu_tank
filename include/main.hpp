@@ -37,13 +37,19 @@
 #include "api.hpp"
 #include "robot-config.hpp"
 #include "autonomous.hpp"
-
+#include "lemlib/api.hpp"
 /**
  * You should add more #includes here
  */
 //#include "okapi/api.hpp"
 //#include "pros/api_legacy.h"
 
+
+std::shared_ptr<lemlib::Chassis> chassis_ptr;
+std::shared_ptr<pros::ADIEncoder> encoder_ptr;
+std::shared_ptr<pros::Rotation> rotation_ptr;
+std::shared_ptr<pros::Imu> imu_ptr;
+std::shared_ptr<lemlib::TrackingWheel> trackingwheel_ptr;
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do
  * Motor, you can use the namespace with the following commented out line.
@@ -54,7 +60,7 @@
  */
 // using namespace pros;
 // using namespace pros::literals;
-// using namespace okapi;
+//using namespace okapi;
 
 /**
  * Prototypes for the competition control tasks are redefined here to ensure

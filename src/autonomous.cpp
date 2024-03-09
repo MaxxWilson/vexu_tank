@@ -495,11 +495,6 @@ void turnLeftArc(double angle, double max_speed, double acceleration){
 	leftDrive.brake();
 	rightDrive.brake();
 }
-void roller(){
-	rollerMotor.move_velocity(200);
-	pros::delay(400);
-	rollerMotor.brake();
-}
 
 // Specific methods for wisco-autons
 void process_match_loads(int num_match_loads){
