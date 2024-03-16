@@ -2,14 +2,13 @@
 #include "robot-config.hpp"
 #include "lemlib/api.hpp"
 
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-//Odom Code
+// Odom Code
 
 // lemlib::Chassis chassis(drivetrain, lateralController, angularController, sensors);
 
@@ -24,74 +23,68 @@
 //     }
 // }
 
-void initialize(){
+void initialize()
+{
 	// printf("hi1\n");
 	// printf("hi2\n");
 
-	//  pros::lcd::initialize(); 
+	//  pros::lcd::initialize();
 	//          pros::lcd::print(1, "x: %f", 69.420); // print the x position
 	// 		// pros::lcd::print(3, "y: %s", "Why am I here, just to suffer?");
 
-//pros::ADIEncoder enc('A', 'B', true); // ports A and B, reversed
-//pros::Rotation rot(1, false); // port 1, not reversed
+	// pros::ADIEncoder enc('A', 'B', true); // ports A and B, reversed
+	// pros::Rotation rot(1, false); // port 1, not reversed
 
+	// pros::Imu inertial_sensor(6); //replacd that 2 with actual port IMU is connected to
 
- //pros::Imu inertial_sensor(6); //replacd that 2 with actual port IMU is connected to
+	// lemlib::TrackingWheel tracking_wheel(&leftDrive, 3.25, 5.5, RPM);
 
+	lemlib::Drivetrain_t drivetrain{
+		&leftDrive,	 // left drivetrain motors
+		&rightDrive, // right drivetrain motors
+		11,			 // change to actual track width
+		3.25,		 // wheel diameter
+		360			 // wheel rpm
+	};
 
-//lemlib::TrackingWheel tracking_wheel(&leftDrive, 3.25, 5.5, RPM);
+	lemlib::ChassisController_t lateralController{
+		8,	 // kP
+		30,	 // kD
+		1,	 // smallErrorRange
+		100, // smallErrorTimeout
+		3,	 // largeErrorRange
+		500, // largeErrorTimeout
+		5	 // slew rate
+	};
 
+	// turning PID
+	lemlib::ChassisController_t angularController{
+		4,	 // kP
+		40,	 // kD
+		1,	 // smallErrorRange
+		100, // smallErrorTimeout
+		3,	 // largeErrorRange
+		500, // largeErrorTimeout
+		0	 // slew rate
+	};
 
+	encoder_ptr = std::make_shared<pros::ADIEncoder>('H', 'G', true);
+	trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(encoder_ptr.get(), 3.25, 0, 1);
+	imu_ptr = std::make_shared<pros::Imu>(10);
+	printf("resetting imu\n");
+	imu_ptr->reset();
+	pros::delay(2000);
+	printf("resetted imu\n");
+	lemlib::OdomSensors_t sensors{
+		trackingwheel_ptr.get(),
+		nullptr,
+		nullptr,
+		nullptr,
+		imu_ptr.get()};
+	chassis_ptr = std::make_shared<lemlib::Chassis>(drivetrain, lateralController, angularController, sensors);
 
-lemlib::Drivetrain_t drivetrain {
-    &leftDrive, // left drivetrain motors
-    &rightDrive, // right drivetrain motors
-    11, // change to actual track width
-    3.25, // wheel diameter
-    360 // wheel rpm
-};
-
-lemlib::ChassisController_t lateralController {
-    8, // kP
-    30, // kD
-    1, // smallErrorRange
-    100, // smallErrorTimeout
-    3, // largeErrorRange
-    500, // largeErrorTimeout
-    5 // slew rate
-};
- 
-// turning PID
-lemlib::ChassisController_t angularController {
-    4, // kP
-    40, // kD
-    1, // smallErrorRange
-    100, // smallErrorTimeout
-    3, // largeErrorRange
-    500, // largeErrorTimeout
-    0 // slew rate
-};
-
-trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(&leftDrive, 3.25, 5.5, RPM);
-lemlib::OdomSensors_t sensors {
-	//trackingwheel_ptr.get(),
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
-	imu_ptr.get()
-};
-chassis_ptr = std::make_shared<lemlib::Chassis>(drivetrain, lateralController, angularController, sensors);
-
-rotation_ptr = std::make_shared<pros::Rotation>(1, false);
-imu_ptr = std::make_shared<pros::Imu>(6);
-
-
-
-
-
-   chassis_ptr->calibrate();
-//	pros::Task screenTask(screen);
+	chassis_ptr->calibrate();
+	//	pros::Task screenTask(screen);
 }
 
 /**
@@ -99,12 +92,13 @@ imu_ptr = std::make_shared<pros::Imu>(6);
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled(){
-	//while(true){
+void disabled()
+{
+	// while(true){
 	//	master.set_text(0, 1, "Ready to Start");
 	//	master.set_text(1, 1, "Battery Level: " + std::to_string(pros::battery::get_capacity()));
 	//	pros::delay(50);
-	//}
+	// }
 }
 
 /**
@@ -116,7 +110,8 @@ void disabled(){
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize(){
+void competition_initialize()
+{
 }
 
 /**
@@ -132,7 +127,8 @@ void competition_initialize(){
  */
 
 using namespace Auton;
-void autonomous(){
+void autonomous()
+{
 	setup();
 	intakeMotorA.move_voltage(-12000);
 	lift.set_value(true);
@@ -176,7 +172,8 @@ void autonomous(){
 	lift.set_value(true);
 	pros::delay(500);
 	auto start_time = pros::millis();
-	while(!climb_switch.get_value() && (pros::millis() - start_time) < 5000){
+	while (!climb_switch.get_value() && (pros::millis() - start_time) < 5000)
+	{
 		leftDrive.move_voltage(10000);
 		rightDrive.move_voltage(10000);
 	}
@@ -199,7 +196,8 @@ void autonomous(){
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol(){
+void opcontrol()
+{
 	// printf("hi\n");
 	// pros:: delay (20);
 	while(true){
