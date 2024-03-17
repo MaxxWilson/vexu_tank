@@ -23,6 +23,15 @@
 //     }
 // }
 
+void odomLogger()
+{
+	while (true)
+	{
+		std::cout << chassis_ptr->getPose().x << " " << chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr->get_rotation() << "deg" << std::endl;
+		pros::delay(300);
+	}
+}
+
 void initialize()
 {
 	// printf("hi1\n");
@@ -39,17 +48,20 @@ void initialize()
 
 	// lemlib::TrackingWheel tracking_wheel(&leftDrive, 3.25, 5.5, RPM);
 
-	lemlib::Drivetrain_t drivetrain{
+	lemlib::Drivetrain drivetrain{
 		&leftDrive,	 // left drivetrain motors
 		&rightDrive, // right drivetrain motors
-		11,			 // change to actual track width
+		10.75,			 // change to actual track width
 		3.25,		 // wheel diameter
-		360			 // wheel rpm
+		360,		 // wheel rpm
+		0,			 // chasepower default
 	};
 
-	lemlib::ChassisController_t lateralController{
+	lemlib::ControllerSettings lateralController{
 		8,	 // kP
+		0, // ki
 		30,	 // kD
+			0, //windup range is what??
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
 		3,	 // largeErrorRange
@@ -58,9 +70,11 @@ void initialize()
 	};
 
 	// turning PID
-	lemlib::ChassisController_t angularController{
+	lemlib::ControllerSettings angularController{
 		4,	 // kP
+		0, // ki
 		40,	 // kD
+		0, //winuprange is what
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
 		3,	 // largeErrorRange
@@ -71,19 +85,19 @@ void initialize()
 	encoder_ptr = std::make_shared<pros::ADIEncoder>('H', 'G', true);
 	trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(encoder_ptr.get(), 3.25, 0, 1);
 	imu_ptr = std::make_shared<pros::Imu>(10);
-	printf("resetting imu\n");
-	imu_ptr->reset();
-	pros::delay(2000);
-	printf("resetted imu\n");
-	lemlib::OdomSensors_t sensors{
+	lemlib::OdomSensors sensors{
 		trackingwheel_ptr.get(),
 		nullptr,
 		nullptr,
 		nullptr,
 		imu_ptr.get()};
+	printf("lemlib calibrating");
 	chassis_ptr = std::make_shared<lemlib::Chassis>(drivetrain, lateralController, angularController, sensors);
 
-	chassis_ptr->calibrate();
+	chassis_ptr->calibrate(true);
+	printf("lemlib calibrating done");
+
+	pros::Task odomLog(odomLogger);
 	//	pros::Task screenTask(screen);
 }
 
@@ -200,102 +214,115 @@ void opcontrol()
 {
 	// printf("hi\n");
 	// pros:: delay (20);
-	while(true){
-		std::cout << chassis_ptr->getPose().x << " " <<  chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta<< std::endl;
-	pros:: delay (200);
+	bool catapultSeated = false;
+	double last_climb_switch_time = pros::millis();
+	bool willie_driving = true;
+
+	while (true)
+	{
+
+		// autonomous();
+		// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+		// 				 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+		// 				 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+		int deadzone = 20;
+		int joystickLeftY = master.get_analog(ANALOG_LEFT_Y);
+		if (abs(joystickLeftY) < deadzone)
+		{
+			joystickLeftY = 0;
+		}
+		int joystickLeftX = master.get_analog(ANALOG_LEFT_X);
+		if (abs(joystickLeftX) < deadzone)
+		{
+			joystickLeftX = 0;
+		}
+		int joystickRightY = master.get_analog(ANALOG_RIGHT_Y);
+		if (abs(joystickRightY) < deadzone)
+		{
+			joystickRightY = 0;
+		}
+		int joystickRightX = master.get_analog(ANALOG_RIGHT_X);
+		if (abs(joystickRightX) < deadzone)
+		{
+			joystickRightX = 0;
+		}
+		bool buttonA = master.get_digital(DIGITAL_A);
+		bool buttonB = master.get_digital(DIGITAL_B);
+
+		if (buttonA && buttonB && willie_driving)
+		{
+			willie_driving = false;
+		}
+
+		// drive
+		const int MAXVOLTAGE = 12000;
+		double leftSpeed = joystickLeftY / 127.0;	// [0,1]
+		double rightSpeed = joystickRightY / 127.0; // [0,1]
+		if (willie_driving)
+		{
+			leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
+			rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
+		}
+		double leftVoltage = leftSpeed * MAXVOLTAGE;
+		double rightVoltage = rightSpeed * MAXVOLTAGE;
+
+		wingR.set_value(master.get_digital(DIGITAL_R1));
+
+		bool buttonL2 = master.get_digital(DIGITAL_L2);
+		bool buttonR2 = master.get_digital(DIGITAL_R2);
+		if (buttonL2 && buttonR2)
+		{
+			leftVoltage *= 0.5;
+			rightVoltage *= 0.5;
+			leftVoltage = rightVoltage;
+			intake.brake();
+		}
+		else if (buttonL2)
+		{
+			intakeMotorA.move_voltage(12000);
+		}
+		else if (buttonR2)
+		{
+			intakeMotorA.move_voltage(-12000);
+		}
+		else
+		{
+			intake.brake();
+		}
+
+		leftDrive.move_voltage(leftVoltage);
+		rightDrive.move_voltage(rightVoltage);
+
+		static bool climbed = false;
+
+		if (master.get_digital(DIGITAL_L1))
+		{
+			if (climb_switch.get_value() && !climbed)
+			{
+				lift.set_value(false);
+				climbed = true;
+				last_climb_switch_time = pros::millis();
+			}
+			else if (pros::millis() - last_climb_switch_time > 3000)
+			{
+				lift.set_value(true);
+				climbed = false;
+			}
+		}
+		else if (master.get_digital(DIGITAL_DOWN))
+		{
+			lift.set_value(true);
+		}
+		else
+		{
+			lift.set_value(false);
+		}
+
+		if (master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT))
+		{
+			autonomous();
+		}
+
+		pros::delay(20);
 	}
-	// bool catapultSeated = false;
-	// double last_climb_switch_time = pros::millis();
-	// bool willie_driving = true;
-	// // autonomous();
-	// while(true){
-	// 	// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-	// 	// 				 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-	// 	// 				 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-	// 	int deadzone = 20;
-	// 	int joystickLeftY = master.get_analog(ANALOG_LEFT_Y);
-	// 	if(abs(joystickLeftY) < deadzone){
-	// 		joystickLeftY = 0;
-	// 	}
-	// 	int joystickLeftX = master.get_analog(ANALOG_LEFT_X);
-	// 	if(abs(joystickLeftX) < deadzone){
-	// 		joystickLeftX = 0;
-	// 	}
-	// 	int joystickRightY = master.get_analog(ANALOG_RIGHT_Y);
-	// 	if(abs(joystickRightY) < deadzone){
-	// 		joystickRightY = 0;
-	// 	}
-	// 	int joystickRightX = master.get_analog(ANALOG_RIGHT_X);
-	// 	if(abs(joystickRightX) < deadzone){
-	// 		joystickRightX = 0;
-	// 	}
-	// 	bool buttonA = master.get_digital(DIGITAL_A);
-	// 	bool buttonB = master.get_digital(DIGITAL_B);
-
-	// 	if(buttonA && buttonB && willie_driving){
-	// 		willie_driving = false;
-	// 	}
-
-	// 	// drive
-	// 	const int MAXVOLTAGE = 12000;
-	// 	double leftSpeed = joystickLeftY / 127.0;  // [0,1]
-	// 	double rightSpeed = joystickRightY / 127.0; // [0,1]
-	// 	if(willie_driving){
-	// 		leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
-	// 		rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
-	// 	}
-	// 	double leftVoltage = leftSpeed * MAXVOLTAGE;
-	// 	double rightVoltage = rightSpeed * MAXVOLTAGE;
-
-	// 	wingR.set_value(master.get_digital(DIGITAL_R1));
-
-
-	// 	bool buttonL2 = master.get_digital(DIGITAL_L2);
-	// 	bool buttonR2 = master.get_digital(DIGITAL_R2);
-	// 	if(buttonL2 && buttonR2){
-	// 		leftVoltage *= 0.5;
-	// 		rightVoltage *= 0.5;
-	// 		leftVoltage = rightVoltage;
-	// 		intake.brake();
-	// 	}
-	// 	else if(buttonL2){
-	// 		intakeMotorA.move_voltage(12000);
-	// 	}
-	// 	else if(buttonR2){
-	// 		intakeMotorA.move_voltage(-12000);
-	// 	}
-	// 	else{
-	// 		intake.brake();
-	// 	}
-
-	// 	leftDrive.move_voltage(leftVoltage);
-	// 	rightDrive.move_voltage(rightVoltage);
-
-	// 	static bool climbed = false;
-
-	// 	if(master.get_digital(DIGITAL_L1)){
-	// 		if(climb_switch.get_value() && !climbed){
-	// 			lift.set_value(false);
-	// 			climbed = true;
-	// 			last_climb_switch_time = pros::millis();
-	// 		}
-	// 		else if(pros::millis() - last_climb_switch_time > 3000){
-	// 			lift.set_value(true);
-	// 			climbed = false;
-	// 		}
-	// 	}
-	// 	else if(master.get_digital(DIGITAL_DOWN)){
-	// 		lift.set_value(true);
-	// 	}
-	// 	else{
-	// 		lift.set_value(false);
-	// 	}
-
-	// 	if(master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT)){
-	// 		autonomous();
-	// 	}
-
-
-	// 	pros::delay(20);
-	// }
 }

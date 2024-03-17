@@ -1,36 +1,22 @@
-#pragma once
-
 #include <vector>
-#include <math.h>
 #include "lemlib/pose.hpp"
+#include "lemlib/util.hpp"
 
-namespace lemlib {
 /**
  * @brief Slew rate limiter
  *
  * @param target target value
  * @param current current value
  * @param maxChange maximum change. No maximum if set to 0
-
  * @return float - the limited value
  */
-float slew(float target, float current, float maxChange);
-
-/**
- * @brief Convert radians to degrees
- *
- * @param rad radians
- * @return float degrees
- */
-constexpr float radToDeg(float rad) { return rad * 180 / M_PI; }
-
-/**
- * @brief Convert degrees to radians
- *
- * @param deg degrees
- * @return float radians
- */
-constexpr float degToRad(float deg) { return deg * M_PI / 180; }
+float lemlib::slew(float target, float current, float maxChange) {
+    float change = target - current;
+    if (maxChange == 0) return target;
+    if (change > maxChange) change = maxChange;
+    else if (change < -maxChange) change = -maxChange;
+    return current + change;
+}
 
 /**
  * @brief Calculate the error between 2 angles. Useful when calculating the error between 2 headings
@@ -40,15 +26,9 @@ constexpr float degToRad(float deg) { return deg * M_PI / 180; }
  * @param radians true if angle is in radians, false if not. False by default
  * @return float wrapped angle
  */
-float angleError(float angle1, float angle2, bool radians = true);
-
-/**
- * @brief Return the sign of a number
- *
- * @param x the number to get the sign of
- * @return int - -1 if negative, 1 if positive
- */
-template <typename T> constexpr T sgn(T value) { return value < 0 ? -1 : 1; }
+float lemlib::angleError(float angle1, float angle2, bool radians) {
+    return std::remainder(angle1 - angle2, radians ? 2 * M_PI : 360);
+}
 
 /**
  * @brief Return the average of a vector of numbers
@@ -56,7 +36,11 @@ template <typename T> constexpr T sgn(T value) { return value < 0 ? -1 : 1; }
  * @param values
  * @return float
  */
-float avg(std::vector<float> values);
+float lemlib::avg(std::vector<float> values) {
+    float sum = 0;
+    for (float value : values) { sum += value; }
+    return sum / values.size();
+}
 
 /**
  * @brief Exponential moving average
@@ -66,7 +50,9 @@ float avg(std::vector<float> values);
  * @param smooth smoothing factor (0-1). 1 means no smoothing, 0 means no change
  * @return float - the smoothed output
  */
-float ema(float current, float previous, float smooth);
+float lemlib::ema(float current, float previous, float smooth) {
+    return (current * smooth) + (previous * (1 - smooth));
+}
 
 /**
  * @brief Get the signed curvature of a circle that intersects the first pose and the second pose
@@ -80,5 +66,15 @@ float ema(float current, float previous, float smooth);
  * @param other the second pose
  * @return float curvature
  */
-float getCurvature(Pose pose, Pose other);
-} // namespace lemlib
+float lemlib::getCurvature(Pose pose, Pose other) {
+    // calculate whether the pose is on the left or right side of the circle
+    float side = lemlib::sgn(std::sin(pose.theta) * (other.x - pose.x) - std::cos(pose.theta) * (other.y - pose.y));
+    // calculate center point and radius
+    float a = -std::tan(pose.theta);
+    float c = std::tan(pose.theta) * pose.x - pose.y;
+    float x = std::fabs(a * other.x + other.y + c) / std::sqrt((a * a) + 1);
+    float d = std::hypot(other.x - pose.x, other.y - pose.y);
+
+    // return curvature
+    return side * ((2 * x) / (d * d));
+}
