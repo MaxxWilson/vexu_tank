@@ -59,9 +59,9 @@ void initialize()
 	};
 
 	lemlib::ControllerSettings lateralController{
-		32,	 // kP
+		8,	 // kP
 		0, // ki
-		4,	 // kD
+		40,	 // kD
 			0, //windup range is what??
 		0.5,	 // smallErrorRange
 		100, // smallErrorTimeout
@@ -149,11 +149,14 @@ void competition_initialize()
 using namespace Auton;
 void autonomous()
 {
-	//chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
+	chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
 	chassis_ptr->moveToPoint(-24, 0, 100000, {}, false );
-	 chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
-	chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
-	chassis_ptr->moveToPose(0, 0,0, 100000, {}, false );
+	chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
+	//chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
+	// chassis_ptr->moveToPose(-24, 0, 0, 100000, {}, false );
+	//  chassis_ptr->moveToPose(-24, 24, 90, 100000, {}, false );
+	// chassis_ptr->moveToPose(0, 24, 0, 100000, {}, false );
+	chassis_ptr->moveToPose(0, 0, 0, 100000, {false}, false );
 
 	//chassis_ptr->turnToHeading(0,100000, {}, false );
 	//chassis_ptr->moveToPose(0, 0, 0,100000, {}, false );
