@@ -24,7 +24,10 @@ constexpr float NEW_4_HALF = 3.995;
 constexpr float OLD_4_HALF = 4.175;
 } // namespace Omniwheel
 
-class TrackingWheel {
+class 
+
+
+TrackingWheel {
     public:
         /**
          * @brief Create a new tracking wheel

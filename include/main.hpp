@@ -48,6 +48,8 @@
 std::shared_ptr<lemlib::Chassis> chassis_ptr;
 std::shared_ptr<pros::ADIEncoder> encoder_ptr;
 std::shared_ptr<pros::Imu> imu_ptr;
+std::shared_ptr<pros::Imu> imu_ptr2;
+
 std::shared_ptr<lemlib::TrackingWheel> trackingwheel_ptr;
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do

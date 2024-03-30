@@ -28,7 +28,7 @@ IS_LIBRARY:=0
 # TODO: CHANGE THIS!
 LIBNAME:=libbest
 VERSION:=1.0.0
-EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/*.cpp
+EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/autonomous.cpp,$(SRCDIR)/main.cpp,$(SRCDIR)/robot-config.cpp
 EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/*.hpp
 # exclude everything in home dir
 
@@ -38,7 +38,8 @@ EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/*.hpp
 TEMPLATE_FILES=$(INCDIR)/**/*.h $(INCDIR)/**/*.hpp
 
 .DEFAULT_GOAL=quick
-
+p:
+	echo $(EXCLUDE_SRC_FROM_LIB)
 ################################################################################
 ################################################################################
 ########## Nothing below this line should be edited by typical users ###########

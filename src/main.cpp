@@ -27,13 +27,14 @@ void odomLogger()
 {
 	while (true)
 	{
-		std::cout << chassis_ptr->getPose().x << " " << chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr->get_rotation() << "deg" << std::endl;
+		std::cout << chassis_ptr->getPose().x << " " << chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr->get_rotation() << "deg   "<<imu_ptr2->get_rotation() << "deg" << std::endl;
 		pros::delay(300);
 	}
 }
 
 void initialize()
 {
+	printf("hi\n");
 	// printf("hi1\n");
 	// printf("hi2\n");
 
@@ -54,17 +55,17 @@ void initialize()
 		10.75,			 // change to actual track width
 		3.25,		 // wheel diameter
 		360,		 // wheel rpm
-		0,			 // chasepower default
+		1,			 // chasepower default
 	};
 
 	lemlib::ControllerSettings lateralController{
-		8,	 // kP
+		32,	 // kP
 		0, // ki
-		30,	 // kD
+		4,	 // kD
 			0, //windup range is what??
-		1,	 // smallErrorRange
+		0.5,	 // smallErrorRange
 		100, // smallErrorTimeout
-		3,	 // largeErrorRange
+		1,	 // largeErrorRange
 		500, // largeErrorTimeout
 		5	 // slew rate
 	};
@@ -85,17 +86,22 @@ void initialize()
 	encoder_ptr = std::make_shared<pros::ADIEncoder>('H', 'G', true);
 	trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(encoder_ptr.get(), 3.25, 0, 1);
 	imu_ptr = std::make_shared<pros::Imu>(10);
+		imu_ptr2 = std::make_shared<pros::Imu>(14);
+
 	lemlib::OdomSensors sensors{
 		trackingwheel_ptr.get(),
 		nullptr,
 		nullptr,
 		nullptr,
-		imu_ptr.get()};
-	printf("lemlib calibrating");
+		imu_ptr2.get()};
+	printf("lemlib calibrating\n");
 	chassis_ptr = std::make_shared<lemlib::Chassis>(drivetrain, lateralController, angularController, sensors);
 
 	chassis_ptr->calibrate(true);
-	printf("lemlib calibrating done");
+	printf("lemlib calibrating done\n");
+	//imu_ptr->reset(  false);
+	//imu_ptr2->reset( true);
+
 
 	pros::Task odomLog(odomLogger);
 	//	pros::Task screenTask(screen);
@@ -143,58 +149,17 @@ void competition_initialize()
 using namespace Auton;
 void autonomous()
 {
-	setup();
-	intakeMotorA.move_voltage(-12000);
-	lift.set_value(true);
-	pros::delay(100);
-	lift.set_value(false);
-	pros::delay(100);
-	wingR.set_value(true);
-	pros::delay(1000);
-	intakeMotorA.move_voltage(-500);
-	process_match_loads(23);
-	// process_match_loads(1);
-	wingR.set_value(false);
-	arcTurnPD(130.0, 2.0, turn_direction_e_t::RIGHT, 5.0);
-	pros::delay(500);
-	driveForwardCubic(8, 0.45);
-	pros::delay(500);
-	intakeMotorA.move_voltage(12000);
-	pros::delay(500);
-	intakeMotorA.move_voltage(0);
-	leftDrive.move_voltage(10000);
-	rightDrive.move_voltage(10000);
-	pros::delay(250);
-	leftDrive.move_voltage(0);
-	rightDrive.move_voltage(0);
-	pros::delay(500);
-	driveForwardCubic(-8, 0.3);
-	pros::delay(500);
-	arcTurnPD(-60.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
-	pros::delay(500);
-	// wingR.set_value(true);
-	driveForwardCubic(-8, 0.4);
-	pros::delay(500);
-	arcTurnPD(-60.0, 1.5, turn_direction_e_t::RIGHT, 3.0);
-	pros::delay(500);
-	driveForwardCubic(-20, 0.4);
-	pros::delay(500);
-	arcTurnPD(-20.0, 0.5, turn_direction_e_t::RIGHT, 6.0);
-	pros::delay(500);
-	driveForwardCubic(-70, 1.1);
-	pros::delay(500);
-	lift.set_value(true);
-	pros::delay(500);
-	auto start_time = pros::millis();
-	while (!climb_switch.get_value() && (pros::millis() - start_time) < 5000)
-	{
-		leftDrive.move_voltage(10000);
-		rightDrive.move_voltage(10000);
-	}
-	lift.set_value(false);
-	leftDrive.move_voltage(0);
-	rightDrive.move_voltage(0);
-	pros::delay(500);
+	//chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
+	chassis_ptr->moveToPoint(-24, 0, 100000, {}, false );
+	 chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
+	chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
+	chassis_ptr->moveToPose(0, 0,0, 100000, {}, false );
+
+	//chassis_ptr->turnToHeading(0,100000, {}, false );
+	//chassis_ptr->moveToPose(0, 0, 0,100000, {}, false );
+	//chassis_ptr->moveToPose(0, -24, 0,100000, {}, false );
+
+
 }
 
 /**
@@ -260,8 +225,8 @@ void opcontrol()
 		double rightSpeed = joystickRightY / 127.0; // [0,1]
 		if (willie_driving)
 		{
-			leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
-			rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
+			leftSpeed = (joystickLeftY + joystickRightX) / 127.0;  // [0,1]
+			rightSpeed = (joystickLeftY - joystickRightX) / 127.0; // [0,1]
 		}
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
