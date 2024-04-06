@@ -27,7 +27,7 @@ void odomLogger()
 {
 	while (true)
 	{
-		std::cout << chassis_ptr->getPose().x << " " << chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr->get_rotation() << "deg   "<<imu_ptr2->get_rotation() << "deg" << std::endl;
+		std::cout << chassis_ptr->getPose().x << " " << chassis_ptr->getPose().y << "  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr2->get_rotation() << "deg" << std::endl;
 		pros::delay(300);
 	}
 }
@@ -52,7 +52,7 @@ void initialize()
 	lemlib::Drivetrain drivetrain{
 		&leftDrive,	 // left drivetrain motors
 		&rightDrive, // right drivetrain motors
-		10.75,			 // change to actual track width
+		10.75,		 // change to actual track width
 		3.25,		 // wheel diameter
 		360,		 // wheel rpm
 		1,			 // chasepower default
@@ -60,22 +60,22 @@ void initialize()
 
 	lemlib::ControllerSettings lateralController{
 		8,	 // kP
-		0, // ki
+		0,	 // ki
 		40,	 // kD
-			0, //windup range is what??
-		0.5,	 // smallErrorRange
+		0,	 // windup range is what??
+		0.2, // smallErrorRange
 		100, // smallErrorTimeout
-		1,	 // largeErrorRange
+		.6,	 // largeErrorRange
 		500, // largeErrorTimeout
 		5	 // slew rate
 	};
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		4,	 // kP
-		0, // ki
-		40,	 // kD
-		0, //winuprange is what
+		8,	 // kP
+		0,	 // ki
+		2,	 // kD
+		0,	 // winuprange is what
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
 		3,	 // largeErrorRange
@@ -85,8 +85,7 @@ void initialize()
 
 	encoder_ptr = std::make_shared<pros::ADIEncoder>('H', 'G', true);
 	trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(encoder_ptr.get(), 3.25, 0, 1);
-	imu_ptr = std::make_shared<pros::Imu>(10);
-		imu_ptr2 = std::make_shared<pros::Imu>(14);
+	imu_ptr2 = std::make_shared<pros::Imu>(14);
 
 	lemlib::OdomSensors sensors{
 		trackingwheel_ptr.get(),
@@ -99,9 +98,8 @@ void initialize()
 
 	chassis_ptr->calibrate(true);
 	printf("lemlib calibrating done\n");
-	//imu_ptr->reset(  false);
-	//imu_ptr2->reset( true);
-
+	// imu_ptr->reset(  false);
+	// imu_ptr2->reset( true);
 
 	pros::Task odomLog(odomLogger);
 	//	pros::Task screenTask(screen);
@@ -146,23 +144,24 @@ void competition_initialize()
  * from where it left off.
  */
 
+ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
-	chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
-	chassis_ptr->moveToPoint(-24, 0, 100000, {}, false );
-	chassis_ptr->moveToPoint(-24, 24, 100000, {}, false );
-	//chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
-	// chassis_ptr->moveToPose(-24, 0, 0, 100000, {}, false );
-	//  chassis_ptr->moveToPose(-24, 24, 90, 100000, {}, false );
-	// chassis_ptr->moveToPose(0, 24, 0, 100000, {}, false );
-	chassis_ptr->moveToPose(0, 0, 0, 100000, {false}, false );
+	chassis_ptr->follow(path_txt, 2, 100000, true, false);
+	return;
+	chassis_ptr->moveToPoint(-12, 0, 100000, {}, false);
+	chassis_ptr->moveToPoint(-12, 12, 100000, {}, false);
+	chassis_ptr->moveToPoint(0, 12, 100000, {}, false);
+	// chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
+	//  chassis_ptr->moveToPose(-24, 0, 0, 100000, {}, false );
+	//   chassis_ptr->moveToPose(-24, 24, 90, 100000, {}, false );
+	//  chassis_ptr->moveToPose(0, 24, 0, 100000, {}, false );
+	chassis_ptr->moveToPose(0, 0, 0, 100000, {false}, false);
 
-	//chassis_ptr->turnToHeading(0,100000, {}, false );
-	//chassis_ptr->moveToPose(0, 0, 0,100000, {}, false );
-	//chassis_ptr->moveToPose(0, -24, 0,100000, {}, false );
-
-
+	// chassis_ptr->turnToHeading(0,100000, {}, false );
+	// chassis_ptr->moveToPose(0, 0, 0,100000, {}, false );
+	// chassis_ptr->moveToPose(0, -24, 0,100000, {}, false );
 }
 
 /**
