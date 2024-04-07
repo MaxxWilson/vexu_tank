@@ -121,6 +121,11 @@ void disabled()
 	// }
 }
 
+void movetobar(){
+	chassis_ptr->turnToHeading(-90, 100000, false);
+	chassis_ptr->moveToPose(72,12, -90, 100000, {},false);
+}
+
 void auton1(){
 //chassis_ptr->setPose(15.5,16,45);
 	//chassis_ptr->turnToPoint (120,18,100000, false);
@@ -136,6 +141,7 @@ chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
 	pros::delay(2000);
 	rightDrive = 0;
 	leftDrive = 0;
+	movetobar();
 }
 
 void auton2(){
@@ -189,7 +195,8 @@ void autonomous()
 {
 
 	chassis_ptr->setPose(15.5,16,45);
-	auton2();
+	//auton2();
+	auton1();
 	return;
 
 
