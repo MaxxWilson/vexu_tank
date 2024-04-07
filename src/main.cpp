@@ -61,13 +61,13 @@ void initialize()
 	};
 
 	lemlib::ControllerSettings lateralController{
-		11,	 // kP
+		10,	 // kP
 		0,	 // ki
-		2,	 // kD
+		0,	 // kD
 		0,	 // windup range is what??
-		0.2, // smallErrorRange
+		0.6, // smallErrorRange
 		100, // smallErrorTimeout
-		.6,	 // largeErrorRange
+		2,	 // largeErrorRange
 		500, // largeErrorTimeout
 		5	 // slew rate
 	};
@@ -121,20 +121,40 @@ void disabled()
 	// }
 }
 
+void auton1(){
+//chassis_ptr->setPose(15.5,16,45);
+	//chassis_ptr->turnToPoint (120,18,100000, false);
+	//chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
+		chassis_ptr->turnToHeading(-90, 10 _s, false);
+chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
+	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false );
+	printf("HEADING NOW \n");
+	chassis_ptr->turnToHeading(225, 10 _s, false);
+	chassis_ptr->moveToPose(126, 48, 180,  3 _s, {false}, false);
+	rightDrive = -127;
+	leftDrive = -127;
+	pros::delay(2000);
+	rightDrive = 0;
+	leftDrive = 0;
+}
+
 void auton2(){
-chassis_ptr->setPose(15.5,16,45);
-//chassis_ptr->moveToPose(48,48, 30, 100000, {}, false);
-chassis_ptr->moveToPoint(48,, 100000, {},false);
+// chassis_ptr->setPose(15.5,16,45);
+//chassis_ptr->turnToHeading()
+chassis_ptr->moveToPose(48,72, 15, 100000, {}, false);
+chassis_ptr->moveToPoint(48,60, 100000, {},false);
 wingR.set_value(true);
 wingL.set_value(true);
 //open wings
-chassis_ptr->moveToPoint(50,36, 100000, {}, false);
+chassis_ptr->moveToPoint(50,44, 100000, {}, false);
 wingR.set_value(false);
 wingL.set_value(false);
 //close wings
-chassis_ptr->moveToPose(15.5,16,45, 100000,{}, false);
-//chassis_ptr->turnToHeading(-90,100000,false);
-//open wings
+chassis_ptr->moveToPose(15.5,16, 45, 10000,{false}, false);
+chassis_ptr->arcade(-40,0);
+pros::delay(2000);
+chassis_ptr->arcade(0,0);
+auton1();
 
 }
 
@@ -167,23 +187,13 @@ ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
+
+	chassis_ptr->setPose(15.5,16,45);
 	auton2();
 	return;
 
-	chassis_ptr->setPose(15.5,16,45);
-	//chassis_ptr->turnToPoint (120,18,100000, false);
-	//chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
-		chassis_ptr->turnToHeading(-90, 10 _s, false);
-chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
-	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false );
-	printf("HEADING NOW \n");
-	chassis_ptr->turnToHeading(225, 10 _s, false);
-	chassis_ptr->moveToPose(126, 48, 180,  3 _s, {false}, false);
-	rightDrive = -127;
-	leftDrive = -127;
-	pros::delay(2000);
-	rightDrive = 0;
-	leftDrive = 0;
+
+	
 
 
     //chassis_ptr->turnToHeading(-90, 10 _s, false);
