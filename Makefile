@@ -1,3 +1,7 @@
+mut:
+	pros --no-analytics mut --after run
+.DEFAULT_GOAL=quick
+
 ################################################################################
 ######################### User configurable parameters #########################
 # filename extensions
@@ -16,28 +20,28 @@ WARNFLAGS+=
 EXTRA_CFLAGS=
 EXTRA_CXXFLAGS=
 
-# Set to 1 to enable hot/cold linking
-USE_PACKAGE:=1
 
 # Add libraries you do not wish to include in the cold image here
 # EXCLUDE_COLD_LIBRARIES:= $(FWDIR)/your_library.a
 EXCLUDE_COLD_LIBRARIES:= 
 
+USE_PACKAGE=1
+
 # Set this to 1 to add additional rules to compile your project as a PROS library template
-IS_LIBRARY:=0
-# TODO: CHANGE THIS!
-LIBNAME:=libbest
+IS_LIBRARY:=1
+LIBNAME:=libtheseus
 VERSION:=1.0.0
-EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/autonomous.cpp,$(SRCDIR)/main.cpp,$(SRCDIR)/robot-config.cpp
-EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/*.hpp
-# exclude everything in home dir
+# this line excludes opcontrol.c and similar files
+EXCLUDE_SRC_FROM_LIB+=$(foreach file, $(SRCDIR)/main $(SRCDIR)/robot-config $(SRCDIR)/autonomous,$(foreach cext,$(CEXTS),$(file).$(cext)) $(foreach cxxext,$(CXXEXTS),$(file).$(cxxext)))
+#EXCLUDE_SRC_FROM_LIB+=$(SRCDIR)/scripts             # exclude any files in the src/scripts directory
+#EXCLUDE_SRC_FROM_LIB+=$(SRCDIR)/lcdselector.cpp     # exclude src/lcdselector.cpp
+
 
 # files that get distributed to every user (beyond your source archive) - add
 # whatever files you want here. This line is configured to add all header files
 # that are in the the include directory get exported
 TEMPLATE_FILES=$(INCDIR)/**/*.h $(INCDIR)/**/*.hpp
 
-.DEFAULT_GOAL=quick
 p:
 	echo $(EXCLUDE_SRC_FROM_LIB)
 ################################################################################

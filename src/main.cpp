@@ -2,6 +2,8 @@
 #include "robot-config.hpp"
 #include "lemlib/api.hpp"
 
+#define _s *1000
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -59,9 +61,9 @@ void initialize()
 	};
 
 	lemlib::ControllerSettings lateralController{
-		8,	 // kP
+		11,	 // kP
 		0,	 // ki
-		40,	 // kD
+		2,	 // kD
 		0,	 // windup range is what??
 		0.2, // smallErrorRange
 		100, // smallErrorTimeout
@@ -72,9 +74,9 @@ void initialize()
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		8,	 // kP
+		2.2,	 // kP
 		0,	 // ki
-		2,	 // kD
+		7,	 // kD
 		0,	 // winuprange is what
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
@@ -119,6 +121,23 @@ void disabled()
 	// }
 }
 
+void auton2(){
+chassis_ptr->setPose(15.5,16,45);
+//chassis_ptr->moveToPose(48,48, 30, 100000, {}, false);
+chassis_ptr->moveToPoint(48,, 100000, {},false);
+wingR.set_value(true);
+wingL.set_value(true);
+//open wings
+chassis_ptr->moveToPoint(50,36, 100000, {}, false);
+wingR.set_value(false);
+wingL.set_value(false);
+//close wings
+chassis_ptr->moveToPose(15.5,16,45, 100000,{}, false);
+//chassis_ptr->turnToHeading(-90,100000,false);
+//open wings
+
+}
+
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
  * Management System or the VEX Competition Switch. This is intended for
@@ -148,21 +167,30 @@ ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
-	chassis_ptr->follow(path_txt, 2, 100000, true, false);
+	auton2();
 	return;
-	chassis_ptr->moveToPoint(-12, 0, 100000, {}, false);
-	chassis_ptr->moveToPoint(-12, 12, 100000, {}, false);
-	chassis_ptr->moveToPoint(0, 12, 100000, {}, false);
-	// chassis_ptr->moveToPoint(0, 24, 100000, {}, false );
-	//  chassis_ptr->moveToPose(-24, 0, 0, 100000, {}, false );
-	//   chassis_ptr->moveToPose(-24, 24, 90, 100000, {}, false );
-	//  chassis_ptr->moveToPose(0, 24, 0, 100000, {}, false );
-	chassis_ptr->moveToPose(0, 0, 0, 100000, {false}, false);
 
-	// chassis_ptr->turnToHeading(0,100000, {}, false );
-	// chassis_ptr->moveToPose(0, 0, 0,100000, {}, false );
-	// chassis_ptr->moveToPose(0, -24, 0,100000, {}, false );
+	chassis_ptr->setPose(15.5,16,45);
+	//chassis_ptr->turnToPoint (120,18,100000, false);
+	//chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
+		chassis_ptr->turnToHeading(-90, 10 _s, false);
+chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
+	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false );
+	printf("HEADING NOW \n");
+	chassis_ptr->turnToHeading(225, 10 _s, false);
+	chassis_ptr->moveToPose(126, 48, 180,  3 _s, {false}, false);
+	rightDrive = -127;
+	leftDrive = -127;
+	pros::delay(2000);
+	rightDrive = 0;
+	leftDrive = 0;
+
+
+    //chassis_ptr->turnToHeading(-90, 10 _s, false);
+	//chassis_ptr->moveToPoint(100, )
 }
+
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -179,6 +207,7 @@ void autonomous()
  */
 void opcontrol()
 {
+	if (master.get_digital(DIGITAL_DOWN)) autonomous();
 	// printf("hi\n");
 	// pros:: delay (20);
 	bool catapultSeated = false;
@@ -233,7 +262,7 @@ void opcontrol()
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 
-		wingR.set_value(master.get_digital(DIGITAL_R1));
+		wingR.set_value(master.get_digital(DIGITAL_L1));
 
 		bool buttonL2 = master.get_digital(DIGITAL_L2);
 		bool buttonR2 = master.get_digital(DIGITAL_R2);

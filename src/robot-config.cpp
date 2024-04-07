@@ -33,7 +33,7 @@ pros::Motor_Group intake = pros::Motor_Group({intakeMotorA});
 
 // sensors
 pros::ADIDigitalOut wingL = pros::ADIDigitalOut('B');
-pros::ADIDigitalOut wingR = pros::ADIDigitalOut('C');
+pros::ADIDigitalOut wingR = pros::ADIDigitalOut('F');
 pros::ADIDigitalOut lift = pros::ADIDigitalOut('D');
 pros::ADIDigitalIn climb_switch = pros::ADIDigitalIn('A');
 
