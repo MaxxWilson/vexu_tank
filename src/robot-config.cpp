@@ -46,7 +46,7 @@ std::vector<pros::Motor> motorList = {
 	rightDriveMotorB,
 	rightDriveMotorC,
 	rightDriveMotorD,
-	intakeMotorA,
+	//intakeMotorA,
 };
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

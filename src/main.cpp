@@ -3,6 +3,25 @@
 #include "lemlib/api.hpp"
 
 #define _s *1000
+float errorcircleradius = 10.30776406;
+std::shared_ptr<pros::Task> auton_task;
+
+void checkPosition()
+{
+	while ((chassis_ptr->getPose().y + errorcircleradius) < 72)
+	{
+		pros::delay(10);
+	}
+	printf("KILINNG============================================================\n");
+	auton_task->remove();
+	while (pros::competition::is_autonomous())
+	{
+			motorInit();
+	rightDrive.brake();
+	leftDrive.brake();
+		pros::delay(2);
+	}
+}
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -74,7 +93,7 @@ void initialize()
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		2.2,	 // kP
+		2.2, // kP
 		0,	 // ki
 		7,	 // kD
 		0,	 // winuprange is what
@@ -121,21 +140,23 @@ void disabled()
 	// }
 }
 
-void movetobar(){
+void movetobar()
+{
 	chassis_ptr->turnToHeading(-90, 100000, false);
-	chassis_ptr->moveToPose(72,12, -90, 100000, {},false);
+	chassis_ptr->moveToPose(72, 12, -90, 100000, {}, false);
 }
 
-void auton1(){
-//chassis_ptr->setPose(15.5,16,45);
-	//chassis_ptr->turnToPoint (120,18,100000, false);
-	//chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
-		chassis_ptr->turnToHeading(-90, 10 _s, false);
-chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
-	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false );
+void auton1()
+{
+	// chassis_ptr->setPose(15.5,16,45);
+	// chassis_ptr->turnToPoint (120,18,100000, false);
+	// chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
+	chassis_ptr->turnToHeading(-90, 10 _s, false);
+	chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false);
+	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false);
 	printf("HEADING NOW \n");
 	chassis_ptr->turnToHeading(225, 10 _s, false);
-	chassis_ptr->moveToPose(126, 48, 180,  3 _s, {false}, false);
+	chassis_ptr->moveToPose(126, 48, 180, 3 _s, {false}, false);
 	rightDrive = -127;
 	leftDrive = -127;
 	pros::delay(2000);
@@ -144,24 +165,26 @@ chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false );
 	movetobar();
 }
 
-void auton2(){
-// chassis_ptr->setPose(15.5,16,45);
-//chassis_ptr->turnToHeading()
-chassis_ptr->moveToPose(48,72, 15, 100000, {}, false);
-chassis_ptr->moveToPoint(48,60, 100000, {},false);
-wingR.set_value(true);
-wingL.set_value(true);
-//open wings
-chassis_ptr->moveToPoint(50,44, 100000, {}, false);
-wingR.set_value(false);
-wingL.set_value(false);
-//close wings
-chassis_ptr->moveToPose(15.5,16, 45, 10000,{false}, false);
-chassis_ptr->arcade(-40,0);
-pros::delay(2000);
-chassis_ptr->arcade(0,0);
-auton1();
+void auton2()
+{
+	// chassis_ptr->setPose(15.5,16,45);
+	// chassis_ptr->turnToHeading()
+	chassis_ptr->moveToPose(48, 70, 15, 100000, {}, false);
+	checkPosition();
 
+	chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
+	wingR.set_value(true);
+	wingL.set_value(true);
+	// open wings
+	chassis_ptr->moveToPoint(50, 44, 100000, {}, false);
+	wingR.set_value(false);
+	wingL.set_value(false);
+	// close wings
+	chassis_ptr->moveToPose(15.5, 16, 45, 10000, {false}, false);
+	chassis_ptr->arcade(-40, 0);
+	pros::delay(2000);
+	chassis_ptr->arcade(0, 0);
+	auton1();
 }
 
 /**
@@ -188,26 +211,38 @@ void competition_initialize()
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-
+void actual_auton()
+{
+	chassis_ptr->setPose(15.5, 16, 45);
+	chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
+	// auton1
+	// auton2
+}
 ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
 
-	chassis_ptr->setPose(15.5,16,45);
-	//auton2();
-	auton1();
-	return;
-
-
-	
-
-
-    //chassis_ptr->turnToHeading(-90, 10 _s, false);
-	//chassis_ptr->moveToPoint(100, )
+	 pros::Task t (checkPosition);
+ auton_task = std::make_shared<pros::Task>(actual_auton);
 }
 
+// Make a function for setting the geofencing parameters
+// Which x/y coordinates can it not pass?
+// Check with the odometry x/y values
+// if it's approaching, then go a
 
+// stops robot movement if its detected that its has crossed tape
+
+// void avoida(){
+// 	if ((chassis_ptr->getPose().y)+ errorcircleradius) >48 && ){
+// }
+
+// }
+
+// if anywhere there is point where center y coordinate is greater than 72
+
+// float errorcircle = 2*M_PI*errorcircleradius;
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -224,7 +259,8 @@ void autonomous()
  */
 void opcontrol()
 {
-	if (master.get_digital(DIGITAL_DOWN)) autonomous();
+	if (master.get_digital(DIGITAL_DOWN))
+		autonomous();
 	// printf("hi\n");
 	// pros:: delay (20);
 	bool catapultSeated = false;
