@@ -184,6 +184,12 @@ void auton2()
 	chassis_ptr->arcade(-40, 0);
 	pros::delay(2000);
 	chassis_ptr->arcade(0, 0);
+	chassis_ptr->arcade(20, 0);
+	pros::delay(300);
+	chassis_ptr->arcade(0, 0);
+		chassis_ptr->arcade(-40, 0);
+	pros::delay(2000);
+	chassis_ptr->arcade(0, 0);
 	auton1();
 }
 
@@ -222,6 +228,7 @@ ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
+auton_task->
 
 	 pros::Task t (checkPosition);
  auton_task = std::make_shared<pros::Task>(actual_auton);
