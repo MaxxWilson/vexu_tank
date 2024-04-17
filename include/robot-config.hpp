@@ -24,8 +24,9 @@ extern pros::Motor_Group leftDrive;
 extern pros::Motor_Group rightDrive;
 extern pros::Motor rollerMotor;
 extern pros::Motor intakeMotorA;
-extern pros::Motor intakeMotorB;
+extern pros::Motor tailMotorA;
 extern pros::Motor_Group intake;
+extern pros::Motor_Group tail;
 extern pros::Motor catapultMotor;
 extern std::vector<pros::Motor> motorList;
 
@@ -34,6 +35,7 @@ extern pros::ADIDigitalOut wingL;
 extern pros::ADIDigitalOut wingR;
 extern pros::ADIDigitalOut lift;
 extern pros::ADIDigitalIn climb_switch;
+
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

@@ -9,6 +9,7 @@ const pros::motor_gearset_e_t driveGearset = pros::E_MOTOR_GEAR_600;
 //  const pros::motor_gearset_e_t rollerGearset = pros::E_MOTOR_GEAR_100;
 const pros::motor_gearset_e_t intakeGearset = pros::E_MOTOR_GEAR_600;
 
+
 // device constructors
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Motor leftDriveMotorA = pros::Motor(20, driveGearset, true, encoder_units);
@@ -18,15 +19,17 @@ pros::Motor leftDriveMotorD = pros::Motor(11, driveGearset, true, encoder_units)
  pros::Motor leftDriveMotorB = pros::Motor(17, driveGearset, false, encoder_units); // out
 
 pros::Motor_Group leftDrive = pros::Motor_Group({leftDriveMotorA, leftDriveMotorB, leftDriveMotorC, leftDriveMotorD});
-pros::Motor rightDriveMotorA = pros::Motor(1, driveGearset, false, encoder_units); // out
+pros::Motor rightDriveMotorA = pros::Motor(13, driveGearset, false, encoder_units); // out
 pros::Motor rightDriveMotorB = pros::Motor(10, driveGearset, false, encoder_units);	// out
  pros::Motor rightDriveMotorD = pros::Motor(16, driveGearset, false, encoder_units);
 
- pros::Motor rightDriveMotorC = pros::Motor(13, driveGearset, true, encoder_units);
+ pros::Motor rightDriveMotorC = pros::Motor(1, driveGearset, true, encoder_units);
 
 pros::Motor_Group rightDrive = pros::Motor_Group({rightDriveMotorA, rightDriveMotorB, rightDriveMotorC, rightDriveMotorD});
 //  pros::Motor rollerMotor = pros::Motor(2, rollerGearset, false, encoder_units);
-pros::Motor intakeMotorA = pros::Motor(20, intakeGearset, true, encoder_units);
+pros::Motor intakeMotorA = pros::Motor(5, intakeGearset, true, encoder_units);
+pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor_Group tail = pros::Motor_Group({tailMotorA});
 //  pros::Motor intakeMotorB = pros::Motor(4, intakeGearset, true, encoder_units);
 pros::Motor_Group intake = pros::Motor_Group({intakeMotorA});
 //  pros::Motor catapultMotor = pros::Motor(1, rollerGearset, true, encoder_units);

@@ -16,9 +16,9 @@ void checkPosition()
 	auton_task->remove();
 	while (pros::competition::is_autonomous())
 	{
-			motorInit();
-	rightDrive.brake();
-	leftDrive.brake();
+		motorInit();
+		rightDrive.brake();
+		leftDrive.brake();
 		pros::delay(2);
 	}
 }
@@ -148,15 +148,25 @@ void movetobar()
 
 void auton1()
 {
-	// chassis_ptr->setPose(15.5,16,45);
-	// chassis_ptr->turnToPoint (120,18,100000, false);
-	// chassis_ptr->movetoPoint(8, 18, 100000, {}, false)
+	for (int i = 0; i < 15; i++)
+	{
+		tailMotorA.move_absolute(-90*3, 100);
+		printf("moved to -90 * 3\n");
+		pros::delay(1000);
+		printf("%f\n", tailMotorA.get_position());
+
+		tailMotorA.move_absolute(0, 100);
+		printf("moved to 0\n");
+
+		pros::delay(1000);
+		printf("%f\n", tailMotorA.get_position());
+	}
 	chassis_ptr->turnToHeading(-90, 10 _s, false);
-	chassis_ptr->moveToPoint(40, 12, 100 _s, {false}, false);
-	chassis_ptr->moveToPoint(96, 10, 100 _s, {false}, false);
+	chassis_ptr->moveToPoint(40, 12, 10 _s, {false}, false);
+	chassis_ptr->moveToPoint(96, 10, 10 _s, {false}, false);
 	printf("HEADING NOW \n");
 	chassis_ptr->turnToHeading(225, 10 _s, false);
-	chassis_ptr->moveToPose(126, 48, 180, 3 _s, {false}, false);
+	chassis_ptr->moveToPose(126, 48, 180, 10 _s, {false}, false);
 	rightDrive = -127;
 	leftDrive = -127;
 	pros::delay(2000);
@@ -187,7 +197,7 @@ void auton2()
 	chassis_ptr->arcade(20, 0);
 	pros::delay(300);
 	chassis_ptr->arcade(0, 0);
-		chassis_ptr->arcade(-40, 0);
+	chassis_ptr->arcade(-40, 0);
 	pros::delay(2000);
 	chassis_ptr->arcade(0, 0);
 	auton1();
@@ -220,18 +230,18 @@ void competition_initialize()
 void actual_auton()
 {
 	chassis_ptr->setPose(15.5, 16, 45);
-	chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
-	// auton1
+	// chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
+	auton1();
 	// auton2
 }
 ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
-auton_task->
 
-	 pros::Task t (checkPosition);
- auton_task = std::make_shared<pros::Task>(actual_auton);
+
+	pros::Task t(checkPosition);
+	auton_task = std::make_shared<pros::Task>(actual_auton);
 }
 
 // Make a function for setting the geofencing parameters
@@ -266,8 +276,7 @@ auton_task->
  */
 void opcontrol()
 {
-	if (master.get_digital(DIGITAL_DOWN))
-		autonomous();
+
 	// printf("hi\n");
 	// pros:: delay (20);
 	bool catapultSeated = false;
@@ -373,10 +382,15 @@ void opcontrol()
 		{
 			lift.set_value(false);
 		}
-
-		if (master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT))
+bool do_auto = master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT);
+static bool last_do_auto = false;
+		if (do_auto && !last_do_auto)
 		{
-			autonomous();
+			last_do_auto = true;
+				autonomous();
+		}
+		else if (!do_auto){
+			last_do_auto=false; 
 		}
 
 		pros::delay(20);
