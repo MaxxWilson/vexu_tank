@@ -32,11 +32,13 @@ pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_200, true, pros::E_MO
 pros::Motor_Group tail = pros::Motor_Group({tailMotorA});
 //  pros::Motor intakeMotorB = pros::Motor(4, intakeGearset, true, encoder_units);
 pros::Motor_Group intake = pros::Motor_Group({intakeMotorA});
+
 //  pros::Motor catapultMotor = pros::Motor(1, rollerGearset, true, encoder_units);
 
 // sensors
 pros::ADIDigitalOut wingL = pros::ADIDigitalOut('B');
 pros::ADIDigitalOut wingR = pros::ADIDigitalOut('F');
+pros::ADIDigitalOut tailPiston = pros::ADIDigitalOut('F');
 pros::ADIDigitalOut lift = pros::ADIDigitalOut('D');
 pros::ADIDigitalIn climb_switch = pros::ADIDigitalIn('A');
 

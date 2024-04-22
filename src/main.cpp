@@ -203,6 +203,17 @@ void auton2()
 	auton1();
 }
 
+// void crackauton(){
+// 	chassis_ptr->moveToPose(48, 70, 0, 100000, {}, false);
+// 	checkPosition();
+// 	chassis_ptr->moveToPoint(30,70, 100000, {}, false);
+
+
+
+
+
+// }
+
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
  * Management System or the VEX Competition Switch. This is intended for
@@ -331,18 +342,40 @@ void opcontrol()
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 
-		wingR.set_value(master.get_digital(DIGITAL_L1));
+		wingR.set_value(master.get_digital(DIGITAL_R1));
+		wingL.set_value(master.get_digital(DIGITAL_L1));
 
 		bool buttonL2 = master.get_digital(DIGITAL_L2);
 		bool buttonR2 = master.get_digital(DIGITAL_R2);
-		if (buttonL2 && buttonR2)
-		{
-			leftVoltage *= 0.5;
-			rightVoltage *= 0.5;
-			leftVoltage = rightVoltage;
-			intake.brake();
+
+		bool buttonleft= master.get_digital(DIGITAL_LEFT);
+		bool buttondown= master.get_digital(DIGITAL_DOWN);
+		//tailPiston.set_value(false);
+		// if (buttonL2 && buttonR2)
+		// {
+		// 	leftVoltage *= 0.5;
+		// 	rightVoltage *= 0.5;
+		// 	leftVoltage = rightVoltage;
+		// 	intake.brake();
+		// }
+
+		if (buttonleft && buttondown){
+			tailPiston.set_value(true);
+			intakeMotorA.move_voltage(0);
+			//intakeMotorA.brake();
+			tailMotorA.move_absolute(0, 127);
+			if (buttonR2 && buttonleft && buttondown){
+				tailMotorA.move_absolute(-90*3, 127);
+			}
+			if (buttonL2 && buttonleft && buttondown){
+				tailMotorA.move_absolute(90*3, 127);
+			}
+			else{
+				tailPiston.set_value(false);
+			}
 		}
-		else if (buttonL2)
+
+		 else if (buttonL2)
 		{
 			intakeMotorA.move_voltage(12000);
 		}

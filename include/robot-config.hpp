@@ -34,6 +34,7 @@ extern std::vector<pros::Motor> motorList;
 extern pros::ADIDigitalOut wingL;
 extern pros::ADIDigitalOut wingR;
 extern pros::ADIDigitalOut lift;
+extern pros::ADIDigitalOut tailPiston;
 extern pros::ADIDigitalIn climb_switch;
 
 
