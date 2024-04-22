@@ -203,16 +203,7 @@ void auton2()
 	auton1();
 }
 
-// void crackauton(){
-// 	chassis_ptr->moveToPose(48, 70, 0, 100000, {}, false);
-// 	checkPosition();
-// 	chassis_ptr->moveToPoint(30,70, 100000, {}, false);
 
-
-
-
-
-// }
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
