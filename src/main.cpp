@@ -2,6 +2,7 @@
 #include "robot-config.hpp"
 #include "lemlib/api.hpp"
 
+const int MAXVOLTAGE = 12000;
 #define _s *1000
 float errorcircleradius = 10.30776406;
 std::shared_ptr<pros::Task> auton_task;
@@ -12,6 +13,11 @@ void checkPosition()
 	{
 		pros::delay(10);
 	}
+	printf("KILINNG============================================================\n");
+	printf("KILINNG============================================================\n");
+	printf("KILINNG============================================================\n");
+	printf("KILINNG============================================================\n");
+	printf("KILINNG============================================================\n");
 	printf("KILINNG============================================================\n");
 	auton_task->remove();
 	while (pros::competition::is_autonomous())
@@ -76,11 +82,11 @@ void initialize()
 		10.75,		 // change to actual track width
 		3.25,		 // wheel diameter
 		360,		 // wheel rpm
-		1,			 // chasepower default
+		300000,		 // chasepower default
 	};
 
 	lemlib::ControllerSettings lateralController{
-		10,	 // kP
+		7.5, // kP
 		0,	 // ki
 		0,	 // kD
 		0,	 // windup range is what??
@@ -88,25 +94,25 @@ void initialize()
 		100, // smallErrorTimeout
 		2,	 // largeErrorRange
 		500, // largeErrorTimeout
-		5	 // slew rate
+		0	 // slew rate
 	};
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		2.2, // kP
+		1.4, // kP
 		0,	 // ki
-		7,	 // kD
+		.8,	 // kD
 		0,	 // winuprange is what
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
-		3,	 // largeErrorRange
+		5,	 // largeErrorRange
 		500, // largeErrorTimeout
-		0	 // slew rate
+		5	 // slew rate
 	};
 
 	encoder_ptr = std::make_shared<pros::ADIEncoder>('H', 'G', true);
 	trackingwheel_ptr = std::make_shared<lemlib::TrackingWheel>(encoder_ptr.get(), 3.25, 0, 1);
-	imu_ptr2 = std::make_shared<pros::Imu>(14);
+	imu_ptr2 = std::make_shared<pros::Imu>(18);
 
 	lemlib::OdomSensors sensors{
 		trackingwheel_ptr.get(),
@@ -148,17 +154,17 @@ void movetobar()
 
 void auton1()
 {
-	for (int i = 0; i < 15; i++)
+	for (int i = 0; i < 12; i++)
 	{
-		tailMotorA.move_absolute(-90*3, 100);
+		tailMotorA.move_absolute(-90 * 3, 100);
 		printf("moved to -90 * 3\n");
-		pros::delay(1000);
+		pros::delay(500);
 		printf("%f\n", tailMotorA.get_position());
 
 		tailMotorA.move_absolute(0, 100);
-		printf("moved to 0\n");
+		printf("moved to 0willie_driving\n");
 
-		pros::delay(1000);
+		pros::delay(500);
 		printf("%f\n", tailMotorA.get_position());
 	}
 	chassis_ptr->turnToHeading(-90, 10 _s, false);
@@ -179,10 +185,12 @@ void auton2()
 {
 	// chassis_ptr->setPose(15.5,16,45);
 	// chassis_ptr->turnToHeading()
-	chassis_ptr->moveToPose(48, 70, 15, 100000, {}, false);
-	checkPosition();
-
-	chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
+	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(45, 60, 15, 100000, {}, false);
+	printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
+	// chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
+	intakeMotorA.move_voltage(0);
 	wingR.set_value(true);
 	wingL.set_value(true);
 	// open wings
@@ -194,16 +202,54 @@ void auton2()
 	chassis_ptr->arcade(-40, 0);
 	pros::delay(2000);
 	chassis_ptr->arcade(0, 0);
-	chassis_ptr->arcade(20, 0);
-	pros::delay(300);
-	chassis_ptr->arcade(0, 0);
-	chassis_ptr->arcade(-40, 0);
-	pros::delay(2000);
-	chassis_ptr->arcade(0, 0);
 	auton1();
 }
 
+void auton3()
+{
+	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(45, 54, 45, 5000, {lead : 0.2}, false);
 
+	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
+	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
+	intakeMotorA.move_voltage(MAXVOLTAGE);
+	chassis_ptr->arcade(-10, 0);
+	pros::delay(1000);
+	chassis_ptr->arcade(0, 0);
+	intakeMotorA.move_voltage(0);
+
+	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->turnToPoint(42, 62, 3000, {}, false);
+	chassis_ptr->moveToPoint(42, 62, 3000, {}, false);
+
+	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
+	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
+	intakeMotorA.move_voltage(MAXVOLTAGE);
+	chassis_ptr->arcade(-10, 0);
+	pros::delay(1000);
+	chassis_ptr->arcade(0, 0);
+	intakeMotorA.move_voltage(0);
+
+	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(48 + 7, 56, 75, 3000, {}, false);
+
+	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
+	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
+
+	intakeMotorA.move_voltage(MAXVOLTAGE);
+	chassis_ptr->arcade(-10, 0);
+	pros::delay(1000);
+	chassis_ptr->arcade(0, 0);
+	intakeMotorA.move_voltage(0);
+
+	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(48 + 10, 62, 45, 3000, {lead : .02}, false);
+
+	chassis_ptr->moveToPose(50, 44, 135, 3000, {lead : .02}, false);
+	intakeMotorA.move_voltage(MAXVOLTAGE);
+	pros::delay(1000);
+	intakeMotorA.move_voltage(0);
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -232,15 +278,26 @@ void competition_initialize()
 void actual_auton()
 {
 	chassis_ptr->setPose(15.5, 16, 45);
-	// chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
-	auton1();
-	// auton2
+
+auton1();
+return;
+	// chassis_ptr->moveToPose(45, 54, 45, 10000, {lead : 0.2}, false);
+
+	// chassis_ptr->turnToPoint(20, 20, 10000, {}, false);
+	// chassis_ptr->moveToPoint(20, 20, 10000, {}, false);
+	// chassis_ptr->turnToPoint(30, 30, 10000, {}, false);
+	// chassis_ptr->moveToPoint(30, 30, 10000, {}, false);
+
+	// return;
+	//  chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
+	//  auton1();
+	//  auton2();
+	auton3();
 }
 ASSET(path_txt)
 using namespace Auton;
 void autonomous()
 {
-
 
 	pros::Task t(checkPosition);
 	auton_task = std::make_shared<pros::Task>(actual_auton);
@@ -287,12 +344,11 @@ void opcontrol()
 
 	while (true)
 	{
-
 		// autonomous();
 		// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		// 				 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		// 				 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int deadzone = 20;
+		int deadzone = 7;
 		int joystickLeftY = master.get_analog(ANALOG_LEFT_Y);
 		if (abs(joystickLeftY) < deadzone)
 		{
@@ -316,15 +372,17 @@ void opcontrol()
 		bool buttonA = master.get_digital(DIGITAL_A);
 		bool buttonB = master.get_digital(DIGITAL_B);
 
-		if (buttonA && buttonB && willie_driving)
+		if (buttonA && buttonB)
 		{
-			willie_driving = false;
+			willie_driving ^= 1;
+			pros::delay(200);
 		}
 
 		// drive
-		const int MAXVOLTAGE = 12000;
 		double leftSpeed = joystickLeftY / 127.0;	// [0,1]
 		double rightSpeed = joystickRightY / 127.0; // [0,1]
+		leftSpeed *= leftSpeed * leftSpeed / fabs(leftSpeed);
+		rightSpeed *= rightSpeed * rightSpeed / fabs(rightSpeed);
 		if (willie_driving)
 		{
 			leftSpeed = (joystickLeftY + joystickRightX) / 127.0;  // [0,1]
@@ -339,35 +397,40 @@ void opcontrol()
 		bool buttonL2 = master.get_digital(DIGITAL_L2);
 		bool buttonR2 = master.get_digital(DIGITAL_R2);
 
-		bool buttonleft= master.get_digital(DIGITAL_LEFT);
-		bool buttondown= master.get_digital(DIGITAL_DOWN);
-		//tailPiston.set_value(false);
-		// if (buttonL2 && buttonR2)
-		// {
-		// 	leftVoltage *= 0.5;
-		// 	rightVoltage *= 0.5;
-		// 	leftVoltage = rightVoltage;
-		// 	intake.brake();
-		// }
+		bool buttonleft = master.get_digital(DIGITAL_LEFT);
+		bool buttondown = master.get_digital(DIGITAL_DOWN);
+		// tailPiston.set_value(false);
+		//  if (buttonL2 && buttonR2)
+		//  {
+		//  	leftVoltage *= 0.5;
+		//  	rightVoltage *= 0.5;
+		//  	leftVoltage = rightVoltage;
+		//  	intake.brake();
+		//  }
 
-		if (buttonleft && buttondown){
+		if (buttonleft && buttondown)
+		{
 			tailPiston.set_value(true);
 			intakeMotorA.move_voltage(0);
-			//intakeMotorA.brake();
+			// intakeMotorA.brake();
 			tailMotorA.move_absolute(0, 127);
-			if (buttonR2 && buttonleft && buttondown){
-				tailMotorA.move_absolute(-90*3, 127);
+			if (buttonR2 && buttonleft && buttondown)
+			{
+				tailMotorA.move_absolute(-90 * 3, 127);
 			}
-			if (buttonL2 && buttonleft && buttondown){
-				tailMotorA.move_absolute(90*3, 127);
+			if (buttonL2 && buttonleft && buttondown)
+			{
+				tailMotorA.move_absolute(90 * 3, 127);
 			}
-			else{
+			else
+			{
 				tailPiston.set_value(false);
 			}
 		}
 
-		 else if (buttonL2)
+		else if (buttonL2)
 		{
+			// TODO WHEN LAST BUTTON PRESSED INTAKE IN, ACTIVATE INTAKE INWARDS, RIGHT IS INWARDS RN
 			intakeMotorA.move_voltage(12000);
 		}
 		else if (buttonR2)
@@ -376,6 +439,7 @@ void opcontrol()
 		}
 		else
 		{
+			intake.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 			intake.brake();
 		}
 
@@ -406,15 +470,16 @@ void opcontrol()
 		{
 			lift.set_value(false);
 		}
-bool do_auto = master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT);
-static bool last_do_auto = false;
+		bool do_auto = master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT);
+		static bool last_do_auto = false;
 		if (do_auto && !last_do_auto)
 		{
 			last_do_auto = true;
-				autonomous();
+			actual_auton();
 		}
-		else if (!do_auto){
-			last_do_auto=false; 
+		else if (!do_auto)
+		{
+			last_do_auto = false;
 		}
 
 		pros::delay(20);
