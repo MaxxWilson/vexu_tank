@@ -99,9 +99,9 @@ void initialize()
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		1.4, // kP
+		1.7, // kP
 		0,	 // ki
-		.8,	 // kD
+		25.6,	 // kD
 		0,	 // winuprange is what
 		1,	 // smallErrorRange
 		100, // smallErrorTimeout
@@ -186,11 +186,11 @@ void auton2()
 	// chassis_ptr->setPose(15.5,16,45);
 	// chassis_ptr->turnToHeading()
 	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	intake.move_voltage(-MAXVOLTAGE);
 	chassis_ptr->moveToPose(45, 60, 15, 100000, {}, false);
 	printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
 	// chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
-	intakeMotorA.move_voltage(0);
+	intake.move_voltage(0);
 	wingR.set_value(true);
 	wingL.set_value(true);
 	// open wings
@@ -207,48 +207,108 @@ void auton2()
 
 void auton3()
 {
-	intakeMotorA.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->moveToPose(45, 54, 45, 5000, {lead : 0.2}, false);
+	intake.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(45, 54, 45, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
 
 	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
 	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
-	intakeMotorA.move_voltage(MAXVOLTAGE);
+	intake.move_voltage(MAXVOLTAGE);
 	chassis_ptr->arcade(-10, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
-	intakeMotorA.move_voltage(0);
+	intake.move_voltage(0);
 
-	intakeMotorA.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->turnToPoint(42, 62, 3000, {}, false);
-	chassis_ptr->moveToPoint(42, 62, 3000, {}, false);
+	intake.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->turnToPoint(47, 62, 3000, {}, false);
+	chassis_ptr->moveToPoint(47, 62, 3000, {}, false);
 
 	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
 	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
-	intakeMotorA.move_voltage(MAXVOLTAGE);
+	intake.move_voltage(MAXVOLTAGE);
 	chassis_ptr->arcade(-10, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
-	intakeMotorA.move_voltage(0);
+	intake.move_voltage(0);
 
-	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	intake.move_voltage(-MAXVOLTAGE);
 	chassis_ptr->moveToPose(48 + 7, 56, 75, 3000, {}, false);
 
+	chassis_ptr->moveToPose(50, 44, 135, 3000, {lead : 0.6, minSpeed : 20, earlyExitRange : 4}, false);
 	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
 	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
 
-	intakeMotorA.move_voltage(MAXVOLTAGE);
+	intake.move_voltage(MAXVOLTAGE);
 	chassis_ptr->arcade(-10, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
-	intakeMotorA.move_voltage(0);
+	intake.move_voltage(0);
 
-	intakeMotorA.move_voltage(-MAXVOLTAGE);
+	intake.move_voltage(-MAXVOLTAGE);
 	chassis_ptr->moveToPose(48 + 10, 62, 45, 3000, {lead : .02}, false);
 
 	chassis_ptr->moveToPose(50, 44, 135, 3000, {lead : .02}, false);
-	intakeMotorA.move_voltage(MAXVOLTAGE);
-	pros::delay(1000);
-	intakeMotorA.move_voltage(0);
+	intake.move_voltage(MAXVOLTAGE);
+
+	//	chassis_ptr->moveToPose(36, 36, 90, 3000, {lead : .6}, false);
+	//
+	//	wingR .set_value( true);
+	//	intake.move_voltage(0);
+
+	//	chassis_ptr->moveToPoint(36 + 24, 36, 3000, {}, false);
+
+	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
+	chassis_ptr->arcade(-40, 0);
+	pros::delay(500);
+	chassis_ptr->arcade(0, 0);
+}
+
+void auton4()
+{
+	intake.move_voltage(-MAXVOLTAGE);
+	chassis_ptr->moveToPose(45, 54, 0, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
+
+chassis_ptr->turnToHeading(45, 1000, false);
+	chassis_ptr->moveToPose(46, 46, 90, 2500, {lead : 0.6}, false);
+
+	intake.move_voltage(MAXVOLTAGE);
+	wingL.set_value(true);
+	wingR.set_value(true);
+	pros::delay(700);
+	chassis_ptr->arcade(55, 0);
+	pros::delay(700);
+	chassis_ptr->arcade(0, 0);
+	intake.move_voltage(0);
+	wingL.set_value(false);
+	wingR.set_value(false);
+
+// ------------------------------------------
+	intake.move_voltage(-MAXVOLTAGE);
+	//chassis_ptr->moveToPose(48+10, 48 + 12 + 5, -30, 5000, {lead : 0.6}, false);
+	chassis_ptr->moveToPoint(48,48, 2500, {false}, false);
+	chassis_ptr->turnToHeading(0, 1000, {}, false);
+
+	chassis_ptr->moveToPose(45, 61, 0, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
+	chassis_ptr->arcade(-20, 0);
+	pros::delay(400);
+	chassis_ptr->arcade(0, 0);
+	chassis_ptr->moveToPose(46, 58.5, 90, 2500, {lead : 0.6}, false);
+
+	intake.move_voltage(MAXVOLTAGE);
+	wingL.set_value(true);
+	wingR.set_value(true);
+	pros::delay(700);
+	chassis_ptr->arcade(55, 0);
+	pros::delay(700);
+	chassis_ptr->arcade(0, 0);
+	intake.move_voltage(0);
+	wingL.set_value(false);
+	wingR.set_value(false);
+
+	// ------------
+	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
+	chassis_ptr->arcade(-30, 0);
+	pros::delay(800);
+	chassis_ptr->arcade(0, 0);
 }
 
 /**
@@ -279,8 +339,9 @@ void actual_auton()
 {
 	chassis_ptr->setPose(15.5, 16, 45);
 
-auton1();
-return;
+	// auton1();
+	// return;
+
 	// chassis_ptr->moveToPose(45, 54, 45, 10000, {lead : 0.2}, false);
 
 	// chassis_ptr->turnToPoint(20, 20, 10000, {}, false);
@@ -292,7 +353,8 @@ return;
 	//  chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
 	//  auton1();
 	//  auton2();
-	auton3();
+	// auton3();
+	auton4();
 }
 ASSET(path_txt)
 using namespace Auton;
@@ -411,8 +473,8 @@ void opcontrol()
 		if (buttonleft && buttondown)
 		{
 			tailPiston.set_value(true);
-			intakeMotorA.move_voltage(0);
-			// intakeMotorA.brake();
+			intake.move_voltage(0);
+			// intake.brake();
 			tailMotorA.move_absolute(0, 127);
 			if (buttonR2 && buttonleft && buttondown)
 			{
@@ -422,25 +484,25 @@ void opcontrol()
 			{
 				tailMotorA.move_absolute(90 * 3, 127);
 			}
-			else
-			{
-				tailPiston.set_value(false);
-			}
-		}
-
-		else if (buttonL2)
-		{
-			// TODO WHEN LAST BUTTON PRESSED INTAKE IN, ACTIVATE INTAKE INWARDS, RIGHT IS INWARDS RN
-			intakeMotorA.move_voltage(12000);
-		}
-		else if (buttonR2)
-		{
-			intakeMotorA.move_voltage(-12000);
 		}
 		else
 		{
-			intake.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-			intake.brake();
+
+			tailPiston.set_value(false);
+			if (buttonL2)
+			{
+				// TODO WHEN LAST BUTTON PRESSED INTAKE IN, ACTIVATE INTAKE INWARDS, RIGHT IS INWARDS RN
+				intake.move_voltage(12000);
+			}
+			else if (buttonR2)
+			{
+				intake.move_voltage(-12000);
+			}
+			else
+			{
+				intake.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+				intake.brake();
+			}
 		}
 
 		leftDrive.move_voltage(leftVoltage);
@@ -448,28 +510,28 @@ void opcontrol()
 
 		static bool climbed = false;
 
-		if (master.get_digital(DIGITAL_L1))
-		{
-			if (climb_switch.get_value() && !climbed)
-			{
-				lift.set_value(false);
-				climbed = true;
-				last_climb_switch_time = pros::millis();
-			}
-			else if (pros::millis() - last_climb_switch_time > 3000)
-			{
-				lift.set_value(true);
-				climbed = false;
-			}
-		}
-		else if (master.get_digital(DIGITAL_DOWN))
-		{
-			lift.set_value(true);
-		}
-		else
-		{
-			lift.set_value(false);
-		}
+		// if (master.get_digital(DIGITAL_L1))
+		//{
+		//	if (climb_switch.get_value() && !climbed)
+		//	{
+		//		lift.set_value(false);
+		//		climbed = true;
+		//		last_climb_switch_time = pros::millis();
+		//	}
+		//	else if (pros::millis() - last_climb_switch_time > 3000)
+		//	{
+		//		lift.set_value(true);
+		//		climbed = false;
+		//	}
+		// }
+		// else if (master.get_digital(DIGITAL_DOWN))
+		//{
+		//	lift.set_value(true);
+		// }
+		// else
+		//{
+		//	lift.set_value(false);
+		// }
 		bool do_auto = master.get_digital(DIGITAL_UP) && master.get_digital(DIGITAL_LEFT) && master.get_digital(DIGITAL_RIGHT);
 		static bool last_do_auto = false;
 		if (do_auto && !last_do_auto)

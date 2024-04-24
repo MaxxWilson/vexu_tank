@@ -27,19 +27,20 @@ pros::Motor rightDriveMotorB = pros::Motor(13, driveGearset, false, encoder_unit
 
 pros::Motor_Group rightDrive = pros::Motor_Group({rightDriveMotorA, rightDriveMotorB, rightDriveMotorC, rightDriveMotorD});
 //  pros::Motor rollerMotor = pros::Motor(2, rollerGearset, false, encoder_units);
-pros::Motor intakeMotorA = pros::Motor(17, intakeGearset, true, encoder_units);
 pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+
+pros::Motor intakeMotorA = pros::Motor(17, intakeGearset, true, encoder_units);
+ pros::Motor intakeMotorB = pros::Motor(8, intakeGearset, false, encoder_units);
 pros::Motor_Group tail = pros::Motor_Group({tailMotorA});
-//  pros::Motor intakeMotorB = pros::Motor(4, intakeGearset, true, encoder_units);
-pros::Motor_Group intake = pros::Motor_Group({intakeMotorA});
+pros::Motor_Group intake = pros::Motor_Group({intakeMotorA, intakeMotorB});
 
 //  pros::Motor catapultMotor = pros::Motor(1, rollerGearset, true, encoder_units);
 
 // sensors
-pros::ADIDigitalOut wingL = pros::ADIDigitalOut('B');
+pros::ADIDigitalOut wingL = pros::ADIDigitalOut('D');
 pros::ADIDigitalOut wingR = pros::ADIDigitalOut('F');
-pros::ADIDigitalOut tailPiston = pros::ADIDigitalOut('F');
-pros::ADIDigitalOut lift = pros::ADIDigitalOut('D');
+pros::ADIDigitalOut tailPiston = pros::ADIDigitalOut('E');
+pros::ADIDigitalOut lift = pros::ADIDigitalOut('C');
 pros::ADIDigitalIn climb_switch = pros::ADIDigitalIn('A');
 
 std::vector<pros::Motor> motorList = {
