@@ -99,7 +99,7 @@ void initialize()
 
 	// turning PID
 	lemlib::ControllerSettings angularController{
-		1.7, // kP
+		2.1, // kP
 		0,	 // ki
 		25.6,	 // kD
 		0,	 // winuprange is what
@@ -267,8 +267,8 @@ void auton4()
 	intake.move_voltage(-MAXVOLTAGE);
 	chassis_ptr->moveToPose(45, 54, 0, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
 
-chassis_ptr->turnToHeading(45, 1000, false);
-	chassis_ptr->moveToPose(46, 46, 90, 2500, {lead : 0.6}, false);
+chassis_ptr->turnToHeading(45, 600, false);
+	chassis_ptr->moveToPose(46, 46, 90, 2000, {lead : 0.6}, false);
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(true);
@@ -291,7 +291,7 @@ chassis_ptr->turnToHeading(45, 1000, false);
 	chassis_ptr->arcade(-20, 0);
 	pros::delay(400);
 	chassis_ptr->arcade(0, 0);
-	chassis_ptr->moveToPose(46, 58.5, 90, 2500, {lead : 0.6}, false);
+	chassis_ptr->moveToPose(46, 58.5, 90, 2000, {lead : 0.6}, false);
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(true);
