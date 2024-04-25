@@ -27,7 +27,6 @@ extern pros::Motor intakeMotorA;
 extern pros::Motor tailMotorA;
 extern pros::Motor_Group intake;
 extern pros::Motor_Group tail;
-extern pros::Motor catapultMotor;
 extern std::vector<pros::Motor> motorList;
 
 // sensors

@@ -13,28 +13,26 @@ const pros::motor_gearset_e_t intakeGearset = pros::E_MOTOR_GEAR_600;
 // device constructors
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Motor leftDriveMotorA = pros::Motor(20, driveGearset, true, encoder_units);
- pros::Motor leftDriveMotorC = pros::Motor(14, driveGearset, true, encoder_units);
+pros::Motor leftDriveMotorC = pros::Motor(14, driveGearset, true, encoder_units);
 pros::Motor leftDriveMotorD = pros::Motor(11, driveGearset, true, encoder_units); // ?
 
- pros::Motor leftDriveMotorB = pros::Motor(19, driveGearset, false, encoder_units); // out
+pros::Motor leftDriveMotorB = pros::Motor(19, driveGearset, false, encoder_units); // out
 
 pros::Motor_Group leftDrive = pros::Motor_Group({leftDriveMotorA, leftDriveMotorB, leftDriveMotorC, leftDriveMotorD});
 pros::Motor rightDriveMotorA = pros::Motor(15, driveGearset, false, encoder_units); // out
-pros::Motor rightDriveMotorB = pros::Motor(13, driveGearset, false, encoder_units);	// out
- pros::Motor rightDriveMotorD = pros::Motor(16, driveGearset, false, encoder_units);
+pros::Motor rightDriveMotorB = pros::Motor(13, driveGearset, false, encoder_units); // out
+pros::Motor rightDriveMotorD = pros::Motor(16, driveGearset, false, encoder_units);
 
- pros::Motor rightDriveMotorC = pros::Motor(12, driveGearset, true, encoder_units);
+pros::Motor rightDriveMotorC = pros::Motor(12, driveGearset, true, encoder_units);
 
 pros::Motor_Group rightDrive = pros::Motor_Group({rightDriveMotorA, rightDriveMotorB, rightDriveMotorC, rightDriveMotorD});
 //  pros::Motor rollerMotor = pros::Motor(2, rollerGearset, false, encoder_units);
-pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_100, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor intakeMotorA = pros::Motor(17, intakeGearset, true, encoder_units);
- pros::Motor intakeMotorB = pros::Motor(8, intakeGearset, false, encoder_units);
+pros::Motor intakeMotorA = pros::Motor(17, intakeGearset, false, encoder_units);
+pros::Motor intakeMotorB = pros::Motor(8, intakeGearset, true, encoder_units);
 pros::Motor_Group tail = pros::Motor_Group({tailMotorA});
 pros::Motor_Group intake = pros::Motor_Group({intakeMotorA, intakeMotorB});
-
-//  pros::Motor catapultMotor = pros::Motor(1, rollerGearset, true, encoder_units);
 
 // sensors
 pros::ADIDigitalOut wingL = pros::ADIDigitalOut('D');
@@ -52,18 +50,16 @@ std::vector<pros::Motor> motorList = {
 	rightDriveMotorB,
 	rightDriveMotorC,
 	rightDriveMotorD,
-	//intakeMotorA,
+	// intakeMotorA,
 };
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  *
  * This should be called at the start of your int main function.
  */
-void motorInit(void)
-{
+void motorInit(void){
 	pros::motor_brake_mode_e_t brakeMode = pros::E_MOTOR_BRAKE_BRAKE;
-	for (pros::Motor motor : motorList)
-	{
+	for(pros::Motor motor : motorList){
 		motor.set_brake_mode(brakeMode);
 	}
 }
