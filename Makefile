@@ -1,5 +1,5 @@
 mut:
-	pros --no-analytics mut --after run
+	pros --no-sentry --no-analytics mut --after run
 .DEFAULT_GOAL=quick
 
 ################################################################################
