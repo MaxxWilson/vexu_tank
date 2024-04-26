@@ -59,13 +59,13 @@ void odomLogger()
 	while (true)
 	{
 		// print either when delta > .3 inches or > 1 deg or every 1sec
-		if (chassis_ptr->getPose().distance(lastpose) > .2 || chassis_ptr->getPose().theta - lastpose.theta > 1 || !(counter % 10))
+		if (chassis_ptr->getPose().distance(lastpose) > .2 || chassis_ptr->getPose().theta - lastpose.theta > 1 || !(counter % 5))
 		{
 			std::cout << pros::millis() / 1000. <<  "s " << chassis_ptr->getPose().x << "in " << chassis_ptr->getPose().y << "in  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr2->get_rotation() << "deg" << std::endl;
 		}
 		counter++;
 		lastpose = chassis_ptr->getPose();
-		pros::delay(100);
+		pros::delay(200);
 	}
 }
 
@@ -160,13 +160,15 @@ void disabled()
 void movetobar()
 {
 	chassis_ptr->turnToHeading(-105, 1.25 _s, false);
-	chassis_ptr->moveToPose(100, 14, -99, 3 _s, {}, false);
-	chassis_ptr->moveToPose(68, 14, -90, 8 _s, {}, false);
+	chassis_ptr->moveToPose(100, 16, -99, 3 _s, {}, false);
+	chassis_ptr->moveToPose(64, 16, -90, 8 _s, {}, false);
 }
 
 void auton1()
 {
 	const int go_back_after_time = 41 _s;
+
+	intake.move_voltage(MAXVOLTAGE);
 	chassis_ptr->arcade(-15, 0);
 	pros::delay(12 _s);
 	//	tailPiston.set_value(true);
@@ -188,25 +190,28 @@ void auton1()
 	//	tailPiston.set_value(false);
 	chassis_ptr->turnToHeading(120, 2.5 _s, false);
 	wingR.set_value(true);
-	chassis_ptr->moveToPoint(40, 14, 2.5 _s, {}, false);
-	chassis_ptr->moveToPoint(96, 10, 2.5 _s, {}, false);
+	chassis_ptr->moveToPoint(43, 15, 2.5 _s, {}, false);
+	chassis_ptr->moveToPoint(96 - 4, 15, 2.5 _s, {maxSpeed: 70}, false);
+	wingL.set_value(true);
 
 	printf("HEADING NOW \n");
 
-	chassis_ptr->turnToHeading(45, 1 _s, false);
-	chassis_ptr->moveToPose(123, 19, 26, 2.5 _s, {lead: .2}, false);
+	//chassis_ptr->turnToHeading(45, 1 _s, false);
+	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {lead: .0}, false);
 	chassis_ptr->arcade(127, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
 
-if ((pros::millis() - auton_start_time) < (41 _s - 2.5 _s)){
-	chassis_ptr->moveToPose(128, 19, 26, 1.5 _s, {false}, false);
-	chassis_ptr->arcade(127, 0);
+if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s)){
+	chassis_ptr->moveToPose(118, 19, 26, .9 _s, {false}, false);
+	chassis_ptr->moveToPose(128, 36, 26 + 180 - 1, .9 _s, {true}, false);
+	chassis_ptr->arcade(-127, 0);
 	pros::delay(800);
 	chassis_ptr->arcade(0, 0);
 }
-if ((pros::millis() - auton_start_time) < (41 _s - 2.5 _s)){
-	chassis_ptr->moveToPose(128, 19, 0, 1.5 _s, {false}, false);
+if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s)){
+
+	chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
 	chassis_ptr->arcade(127, 0);
 	pros::delay(800);
 	chassis_ptr->arcade(0, 0);
@@ -393,7 +398,7 @@ void actual_auton()
 	//  auton1();
 	//  auton2();
 	// auton3();
-	auton4();
+	auton1();
 }
 ASSET(path_txt)
 using namespace Auton;
