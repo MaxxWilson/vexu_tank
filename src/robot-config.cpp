@@ -14,7 +14,7 @@ const pros::motor_gearset_e_t intakeGearset = pros::E_MOTOR_GEAR_600;
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Motor leftDriveMotorA = pros::Motor(20, driveGearset, true, encoder_units);
 pros::Motor leftDriveMotorC = pros::Motor(14, driveGearset, true, encoder_units);
-pros::Motor leftDriveMotorD = pros::Motor(11, driveGearset, true, encoder_units); // ?
+pros::Motor leftDriveMotorD = pros::Motor(2, driveGearset, true, encoder_units); // ?
 
 pros::Motor leftDriveMotorB = pros::Motor(19, driveGearset, false, encoder_units); // out
 
@@ -27,7 +27,7 @@ pros::Motor rightDriveMotorC = pros::Motor(12, driveGearset, true, encoder_units
 
 pros::Motor_Group rightDrive = pros::Motor_Group({rightDriveMotorA, rightDriveMotorB, rightDriveMotorC, rightDriveMotorD});
 //  pros::Motor rollerMotor = pros::Motor(2, rollerGearset, false, encoder_units);
-pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_100, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor tailMotorA = pros::Motor(4, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Motor intakeMotorA = pros::Motor(17, intakeGearset, false, encoder_units);
 pros::Motor intakeMotorB = pros::Motor(8, intakeGearset, true, encoder_units);

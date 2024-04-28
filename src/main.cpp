@@ -61,7 +61,7 @@ void odomLogger()
 		// print either when delta > .3 inches or > 1 deg or every 1sec
 		if (chassis_ptr->getPose().distance(lastpose) > .2 || chassis_ptr->getPose().theta - lastpose.theta > 1 || !(counter % 5))
 		{
-			std::cout << pros::millis() / 1000. <<  "s " << chassis_ptr->getPose().x << "in " << chassis_ptr->getPose().y << "in  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr2->get_rotation() << "deg" << std::endl;
+			std::cout << pros::millis() / 1000. << "s " << chassis_ptr->getPose().x << "in " << chassis_ptr->getPose().y << "in  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr2->get_rotation() << "deg" << std::endl;
 		}
 		counter++;
 		lastpose = chassis_ptr->getPose();
@@ -170,52 +170,55 @@ void auton1()
 
 	intake.move_voltage(MAXVOLTAGE);
 	chassis_ptr->arcade(-15, 0);
-	pros::delay(12 _s);
-	//	tailPiston.set_value(true);
-	// for(int i = 0; i < 12; i++){
-	//	tailMotorA.move_absolute(-70 , 100);
-	//	printf("moved to -90 * 3\n");
-	//	pros::delay(500);
-	//	printf("%f\n", tailMotorA.get_position());
+	tailPiston.set_value(true);
+	for (int i = 0; i < 12; i++)
+	{
+		tailMotorA.move_absolute(-80, 100);
+		printf("moved to -90 * 3\n");
+		pros::delay(500);
+		printf("%f\n", tailMotorA.get_position());
 
-	//	tailMotorA.move_absolute(50, 100);
-	//	printf("moved to 0\n");
+		tailMotorA.move_absolute(80, 100);
+		printf("moved to 0\n");
 
-	//	pros::delay(500);
-	//	printf("%f\n", tailMotorA.get_position());
+		pros::delay(500);
+		printf("%f\n", tailMotorA.get_position());
 
-	chassis_ptr->arcade(0, 0); // it stops going backward after one loop
-	//}
-	//	tailMotorA.move_absolute(0, 100);
-	//	tailPiston.set_value(false);
+		chassis_ptr->arcade(0, 0); // it stops going backward after one loop
+	}
+		tailMotorA.move_absolute(0, 100);
+		
 	chassis_ptr->turnToHeading(120, 2.5 _s, false);
+	tailPiston.set_value(false);
 	wingR.set_value(true);
-	chassis_ptr->moveToPoint(43, 15, 2.5 _s, {}, false);
-	chassis_ptr->moveToPoint(96 - 4, 15, 2.5 _s, {maxSpeed: 70}, false);
+	chassis_ptr->moveToPoint(43, 11, 2.5 _s, {}, false);
+	chassis_ptr->moveToPoint(96 - 4, 13, 2.5 _s, {maxSpeed : 90}, false);
 	wingL.set_value(true);
 
 	printf("HEADING NOW \n");
 
-	//chassis_ptr->turnToHeading(45, 1 _s, false);
-	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {lead: .0}, false);
+	// chassis_ptr->turnToHeading(45, 1 _s, false);
+	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {lead : .0, maxSpeed:80}, false);
 	chassis_ptr->arcade(127, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
 
-if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s)){
-	chassis_ptr->moveToPose(118, 19, 26, .9 _s, {false}, false);
-	chassis_ptr->moveToPose(128, 36, 26 + 180 - 1, .9 _s, {true}, false);
-	chassis_ptr->arcade(-127, 0);
-	pros::delay(800);
-	chassis_ptr->arcade(0, 0);
-}
-if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s)){
+	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
+	{
+		chassis_ptr->moveToPose(118, 19, 26, .9 _s, {false}, false);
+		chassis_ptr->moveToPose(128, 36, 26 + 180 - 1, .9 _s, {true}, false);
+		chassis_ptr->arcade(-127, 0);
+		pros::delay(800);
+		chassis_ptr->arcade(0, 0);
+	}
+	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
+	{
 
-	chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
-	chassis_ptr->arcade(127, 0);
-	pros::delay(800);
-	chassis_ptr->arcade(0, 0);
-}
+		chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
+		chassis_ptr->arcade(27, 0);
+		pros::delay(800);
+		chassis_ptr->arcade(0, 0);
+	}
 
 	wingL.set_value(false);
 	wingR.set_value(false);
@@ -305,11 +308,22 @@ void auton3()
 
 void auton4()
 {
+
+	tailPiston.set_value(true);
+	tailMotorA.move_absolute(-80, 100);
+	pros::delay(800);
+
+	tailMotorA.move_absolute(80, 100);
+	pros::delay(800);
+	tailMotorA.move_absolute(00, 100);
+	pros::delay(600);
+	tailPiston.set_value(false);
+
 	intake.move_voltage(-MAXVOLTAGE);
 	chassis_ptr->moveToPose(45, 54, 0, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
 
 	chassis_ptr->turnToHeading(90, 600, false); // tmp testing
-	//chassis_ptr->moveToPose(46, 46, 90, 2000, {lead : 0.6}, false);
+	// chassis_ptr->moveToPose(46, 46, 90, 2000, {lead : 0.6}, false);
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(false); // knocks other ball
@@ -326,9 +340,9 @@ void auton4()
 	intake.move_voltage(-MAXVOLTAGE);
 	// chassis_ptr->moveToPose(48+10, 48 + 12 + 5, -30, 5000, {lead : 0.6}, false);
 	chassis_ptr->moveToPoint(48, 48, 2500, {false}, false);
-	chassis_ptr->turnToHeading(0, 1000, {minSpeed: 1, earlyExitRange: 10}, false);
+	chassis_ptr->turnToHeading(0, 1000, {minSpeed : 1, earlyExitRange : 10}, false);
 
-	chassis_ptr->moveToPose(45, 61, 0, 1500, {lead : 0.6 }, false);
+	chassis_ptr->moveToPose(45, 61, 0, 1500, {lead : 0.6}, false);
 	chassis_ptr->arcade(-20, 0);
 	pros::delay(400);
 	chassis_ptr->arcade(0, 0);
@@ -348,7 +362,6 @@ void auton4()
 	intake.move_voltage(MAXVOLTAGE);
 	// ------------
 	chassis_ptr->moveToPose(15.5 - 2, 16, 45, 3000, {false}, false);
-
 
 	auton1();
 }
@@ -380,7 +393,7 @@ void competition_initialize()
 void actual_auton()
 {
 
-	auton_start_time = pros::millis(); 
+	auton_start_time = pros::millis();
 	chassis_ptr->setPose(15.5, 16, 45);
 
 	// auton1();
@@ -398,7 +411,7 @@ void actual_auton()
 	//  auton1();
 	//  auton2();
 	// auton3();
-	auton1();
+	auton4();
 }
 ASSET(path_txt)
 using namespace Auton;
@@ -511,20 +524,24 @@ void opcontrol()
 		//  	intake.brake();
 		//  }
 		double tail_setpoint = 0.0;
-		const double tail_kp = 2.5 * 12000.0 / 90.0;
-		const double tail_kd = 1.0 * 12000.0 / 100.0;
+		double tail_kp = 0.0;
+		double tail_kd = 0.0;
 		if (buttonleft && buttondown)
 		{
+			tail_kp = 3.0 * 12000.0 / 90.0;
+			tail_kd = 0.0;
 			tailPiston.set_value(true);
 			intake.move_voltage(0);
 			tail_setpoint = -90.0;
 			if (buttonR2)
 			{
-				tail_setpoint = 90.0;
+				tail_setpoint = 110.0;
 			}
 		}
 		else
 		{
+			tail_kp = 1.5 * 12000.0 / 90.0;
+			tail_kd = 0.25 * 12000.0 / 100.0;
 			tailPiston.set_value(false);
 			if (buttonL2)
 			{
