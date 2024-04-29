@@ -11,7 +11,8 @@ unsigned int auton_start_time = 0;
 
 void checkPosition()
 {
-	while ((chassis_ptr->getPose().y + errorcircleradius) < 72)
+	return;
+	while ((chassis_ptr->getPose().y + errorcircleradius) < 78)
 	{
 		pros::delay(10);
 	}
@@ -159,9 +160,9 @@ void disabled()
 
 void movetobar()
 {
-	chassis_ptr->turnToHeading(-105, 1.25 _s, false);
-	chassis_ptr->moveToPose(100, 16, -99, 3 _s, {}, false);
-	chassis_ptr->moveToPose(64, 16, -90, 8 _s, {}, false);
+	chassis_ptr->turnToHeading(-115, 1.25 _s, false);
+	chassis_ptr->moveToPose(100, 13, -99, 3 _s, {}, false);
+	chassis_ptr->moveToPose(64, 12, -90, 8 _s, {}, false);
 }
 
 void auton1()
@@ -173,12 +174,12 @@ void auton1()
 	tailPiston.set_value(true);
 	for (int i = 0; i < 12; i++)
 	{
-		tailMotorA.move_absolute(-80, 100);
+		tailMotorA.move_absolute(-90, 100);
 		printf("moved to -90 * 3\n");
 		pros::delay(500);
 		printf("%f\n", tailMotorA.get_position());
 
-		tailMotorA.move_absolute(80, 100);
+		tailMotorA.move_absolute(90, 100);
 		printf("moved to 0\n");
 
 		pros::delay(500);
@@ -198,18 +199,17 @@ void auton1()
 	printf("HEADING NOW \n");
 
 	// chassis_ptr->turnToHeading(45, 1 _s, false);
-	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {lead : .0, maxSpeed:80}, false);
+	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {forwards: true, lead : .0, maxSpeed:80}, false);
 	chassis_ptr->arcade(127, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
 
 	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
 	{
-		chassis_ptr->moveToPose(118, 19, 26, .9 _s, {false}, false);
-		chassis_ptr->moveToPose(128, 36, 26 + 180 - 1, .9 _s, {true}, false);
-		chassis_ptr->arcade(-127, 0);
-		pros::delay(800);
-		chassis_ptr->arcade(0, 0);
+			chassis_ptr->moveToPose(123, 26, 0, 2.5 _s, {forwards: false, lead : .0, maxSpeed:80}, false);
+	chassis_ptr->arcade(127, 0);
+	pros::delay(1000);
+	chassis_ptr->arcade(0, 0);
 	}
 	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
 	{
@@ -219,7 +219,9 @@ void auton1()
 		pros::delay(800);
 		chassis_ptr->arcade(0, 0);
 	}
-
+chassis_ptr->arcade(-47, 0);
+		pros::delay(400);
+		chassis_ptr->arcade(0, 0);
 	wingL.set_value(false);
 	wingR.set_value(false);
 	movetobar();
@@ -361,7 +363,7 @@ void auton4()
 
 	intake.move_voltage(MAXVOLTAGE);
 	// ------------
-	chassis_ptr->moveToPose(15.5 - 2, 16, 45, 3000, {false}, false);
+	chassis_ptr->moveToPose(15.5 , 16, 45, 3000, {false}, false);
 
 	auton1();
 }
