@@ -160,8 +160,8 @@ void disabled()
 
 void movetobar()
 {
-	chassis_ptr->turnToHeading(-115, 1.25 _s, false);
-	chassis_ptr->moveToPose(100, 13, -99, 3 _s, {}, false);
+	chassis_ptr->turnToHeading(-95, 1.25 _s, false);
+	chassis_ptr->moveToPose(93, 13, -99, 3 _s, {}, false);
 	chassis_ptr->moveToPose(64, 12, -90, 8 _s, {}, false);
 }
 
