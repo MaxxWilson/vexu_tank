@@ -193,6 +193,17 @@ void auton1()
 	tailPiston.set_value(false);
 	wingR.set_value(true);
 	chassis_ptr->moveToPoint(43, 11, 2.5 _s, {}, false);
+
+	///// TEMPORARY DUMB AUTON
+
+	if (false)
+	{
+		chassis_ptr->moveToPoint(78, 12, 2.5 _s, {maxSpeed : 90}, false);
+		return;
+	}
+
+	////// DISABLE IF NOT NEEDED
+
 	chassis_ptr->moveToPoint(96 - 4, 13, 2.5 _s, {maxSpeed : 90}, false);
 	wingL.set_value(true);
 
@@ -313,12 +324,12 @@ void auton4()
 
 	tailPiston.set_value(true);
 	tailMotorA.move_absolute(-80, 100);
-	pros::delay(800);
+	pros::delay(500);
 
-	tailMotorA.move_absolute(80, 100);
-	pros::delay(800);
+	tailMotorA.move_absolute(90, 100);
+	pros::delay(500);
 	tailMotorA.move_absolute(00, 100);
-	pros::delay(600);
+	pros::delay(300);
 	tailPiston.set_value(false);
 
 	intake.move_voltage(-MAXVOLTAGE);
@@ -363,7 +374,7 @@ void auton4()
 
 	intake.move_voltage(MAXVOLTAGE);
 	// ------------
-	chassis_ptr->moveToPose(15.5 , 16, 45, 3000, {false}, false);
+	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
 
 	auton1();
 }
@@ -459,7 +470,7 @@ void opcontrol()
 	// printf("hi\n");
 	// pros:: delay (20);
 	double last_climb_switch_time = pros::millis();
-	bool willie_driving = true;
+	unsigned willie_driving = 1;
 
 	while (true)
 	{
@@ -493,7 +504,7 @@ void opcontrol()
 
 		if (buttonA && buttonB)
 		{
-			willie_driving ^= 1;
+			willie_driving  = (willie_driving + 1) % 3;
 			pros::delay(200);
 		}
 
@@ -502,10 +513,13 @@ void opcontrol()
 		double rightSpeed = joystickRightY / 127.0; // [0,1]
 		leftSpeed *= leftSpeed * leftSpeed / fabs(leftSpeed);
 		rightSpeed *= rightSpeed * rightSpeed / fabs(rightSpeed);
-		if (willie_driving)
+		if (willie_driving == 1)
 		{
 			leftSpeed = (joystickLeftY + joystickRightX) / 127.0;  // [0,1]
 			rightSpeed = (joystickLeftY - joystickRightX) / 127.0; // [0,1]
+		} else if (willie_driving == 2) {
+			leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
+			rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
 		}
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
