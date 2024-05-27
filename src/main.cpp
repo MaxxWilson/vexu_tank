@@ -165,76 +165,139 @@ void movetobar()
 	chassis_ptr->moveToPose(64, 12, -90, 8 _s, {}, false);
 }
 
-void auton1()
+void subauton11()
 {
-	const int go_back_after_time = 41 _s;
+	const int go_back_after_time = 41000 _s;
 
-	intake.move_voltage(MAXVOLTAGE);
-	chassis_ptr->arcade(-15, 0);
-	tailPiston.set_value(true);
-	for (int i = 0; i < 12; i++)
-	{
-		tailMotorA.move_absolute(-90, 100);
-		printf("moved to -90 * 3\n");
-		pros::delay(500);
-		printf("%f\n", tailMotorA.get_position());
+	intake.move_voltage(2* MAXVOLTAGE / 3);
+	//chassis_ptr->arcade(-15, 0);
+	//tailPiston.set_value(true);
+	//for (int i = 0; i < 1; i++)
+	//{
+	//	tailMotorA.move_absolute(-120, 600);
+	//	printf("moved to -90 * 3\n");
+	//	pros::delay(500);
+	//	printf("%f\n", tailMotorA.get_position());
 
-		tailMotorA.move_absolute(90, 100);
-		printf("moved to 0\n");
+	//	tailMotorA.move_absolute(120, 600);
+	//	printf("moved to 0\n");
 
-		pros::delay(500);
-		printf("%f\n", tailMotorA.get_position());
+	//	pros::delay(500);
+	//	printf("%f\n", tailMotorA.get_position());
 
-		chassis_ptr->arcade(0, 0); // it stops going backward after one loop
-	}
-		tailMotorA.move_absolute(0, 100);
-		
-	chassis_ptr->turnToHeading(120, 2.5 _s, false);
-	tailPiston.set_value(false);
-	wingR.set_value(true);
-	chassis_ptr->moveToPoint(43, 11, 2.5 _s, {}, false);
+	//	chassis_ptr->arcade(0, 0); // it stops going backward after one loop
+	//}
+	//tailMotorA.move_absolute(0, 100);
 
-	///// TEMPORARY DUMB AUTON
+	//chassis_ptr->turnToHeading(120, 2.5 _s, false);
+	//tailPiston.set_value(false);
+	//// wingR.set_value(true);
+	//chassis_ptr->moveToPoint(43, 9, 2.5 _s, {}, false);
 
-	if (false)
-	{
-		chassis_ptr->moveToPoint(78, 12, 2.5 _s, {maxSpeed : 90}, false);
-		return;
-	}
+	//////// DISABLE IF NOT NEEDED
 
-	////// DISABLE IF NOT NEEDED
-
-	chassis_ptr->moveToPoint(96 - 4, 13, 2.5 _s, {maxSpeed : 90}, false);
+	//wingL.set_value(true);
+	//chassis_ptr->moveToPose(96, 7,80, 2.5 _s, {maxSpeed : 85}, false);
+	//TMP for hypertuning commented out all of aboete
 	wingL.set_value(true);
+	chassis_ptr->setPose(96, 7, 80);
 
 	printf("HEADING NOW \n");
 
 	// chassis_ptr->turnToHeading(45, 1 _s, false);
-	chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {forwards: true, lead : .0, maxSpeed:80}, false);
+	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	{
+		pros::delay(10);
+	}
+	chassis_ptr->moveToPose(136, 34, 0, 4.5 _s, {forwards : true, lead : .5, maxSpeed : 60}, false);
+	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	{
+		pros::delay(10);
+	}
+	// chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {forwards : true, lead : .0, maxSpeed : 80}, false);
+
+	chassis_ptr->arcade(-47, 0);
+	pros::delay(300);
 	chassis_ptr->arcade(127, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
 
-	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
-	{
-			chassis_ptr->moveToPose(123, 26, 0, 2.5 _s, {forwards: false, lead : .0, maxSpeed:80}, false);
+	chassis_ptr->arcade(-47, 0);
+	pros::delay(700);
+
+	chassis_ptr->turnToHeading(0, 1 _s, false);
+
 	chassis_ptr->arcade(127, 0);
 	pros::delay(1000);
 	chassis_ptr->arcade(0, 0);
-	}
-	if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
-	{
 
-		chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
-		chassis_ptr->arcade(27, 0);
-		pros::delay(800);
-		chassis_ptr->arcade(0, 0);
-	}
-chassis_ptr->arcade(-47, 0);
-		pros::delay(400);
-		chassis_ptr->arcade(0, 0);
+	chassis_ptr->arcade(-47, 0);
+	pros::delay(700);
+	chassis_ptr->tank(0, 20);
+	pros::delay(700);
+	chassis_ptr->arcade(0, 0);
+
 	wingL.set_value(false);
 	wingR.set_value(false);
+}
+
+void auton1()
+{
+
+	// if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
+	//{
+	//	chassis_ptr->moveToPose(125, 26, 0, 2.5 _s, {forwards : false, lead : .0, maxSpeed : 80}, false);
+	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	//	{
+	//		pros::delay(10);
+	//	}
+	//	chassis_ptr->arcade(127, 0);
+	//	pros::delay(1000);
+	//	chassis_ptr->arcade(0, 0);
+	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	//	{
+	//		pros::delay(10);
+	//	}
+	// }
+	// if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
+	//{
+
+	//	chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
+	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	//	{
+	//		pros::delay(10);
+	//	}
+	//	chassis_ptr->arcade(27, 0);
+	//	pros::delay(800);
+	//	chassis_ptr->arcade(0, 0);
+	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	//	{
+	//		pros::delay(10);
+	//	}
+	//}
+	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	{
+		pros::delay(10);
+	}
+	subauton11();
+
+	chassis_ptr->turnToHeading(-95, 1.85 _s, false);
+
+	chassis_ptr->moveToPose(93, 13, -99, 3 _s, {minSpeed : 20, earlyExitRange : 4}, false);
+
+	chassis_ptr->moveToPose(36, 17, -90, 3 _s, {minSpeed : 20, earlyExitRange : 4}, false);
+
+	chassis_ptr->moveToPose(24, 28, 0, 8 _s, {lead : 0.4, minSpeed : 20, earlyExitRange : 4}, false);
+
+	chassis_ptr->setPose(24, 24, 0);
+
+	chassis_ptr->moveToPose(15.5, 16, 45, 3 _s, {false}, false);
+
+	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	{
+		pros::delay(10);
+	}
+	subauton11();
 	movetobar();
 }
 
@@ -421,10 +484,10 @@ void actual_auton()
 
 	// return;
 	//  chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
-	//  auton1();
+	auton1();
 	//  auton2();
 	// auton3();
-	auton4();
+	// auton4();
 }
 ASSET(path_txt)
 using namespace Auton;
@@ -504,7 +567,7 @@ void opcontrol()
 
 		if (buttonA && buttonB)
 		{
-			willie_driving  = (willie_driving + 1) % 3;
+			willie_driving = (willie_driving + 1) % 3;
 			pros::delay(200);
 		}
 
@@ -517,7 +580,9 @@ void opcontrol()
 		{
 			leftSpeed = (joystickLeftY + joystickRightX) / 127.0;  // [0,1]
 			rightSpeed = (joystickLeftY - joystickRightX) / 127.0; // [0,1]
-		} else if (willie_driving == 2) {
+		}
+		else if (willie_driving == 2)
+		{
 			leftSpeed = (joystickLeftY + joystickLeftX) / 127.0;  // [0,1]
 			rightSpeed = (joystickLeftY - joystickLeftX) / 127.0; // [0,1]
 		}
