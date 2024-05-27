@@ -238,7 +238,7 @@ void subauton11()
 	chassis_ptr->arcade(0, 0);
 
 	wingL.set_value(false);
-	wingR.set_value(false);
+	//wingR.set_value(false);
 }
 
 void auton1()
@@ -311,11 +311,11 @@ void auton2()
 	printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
 	// chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
 	intake.move_voltage(0);
-	wingR.set_value(true);
+	//wingR.set_value(true);
 	wingL.set_value(true);
 	// open wings
 	chassis_ptr->moveToPoint(50, 44, 100000, {}, false);
-	wingR.set_value(false);
+	//wingR.set_value(false);
 	wingL.set_value(false);
 	// close wings
 	chassis_ptr->moveToPose(15.5, 16, 45, 10000, {false}, false);
@@ -403,14 +403,14 @@ void auton4()
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(false); // knocks other ball
-	wingR.set_value(true);
+	//wingR.set_value(true);
 	pros::delay(300); // tiny negligible i think should do
 	chassis_ptr->arcade(55, 0);
 	pros::delay(700);
 	chassis_ptr->arcade(0, 0);
 	intake.move_voltage(0);
 	wingL.set_value(false);
-	wingR.set_value(false);
+	//wingR.set_value(false);
 
 	// ------------------------------------------
 	intake.move_voltage(-MAXVOLTAGE);
@@ -426,14 +426,14 @@ void auton4()
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(true);
-	wingR.set_value(true);
+	//wingR.set_value(true);
 	pros::delay(300);
 	chassis_ptr->arcade(55, 0);
 	pros::delay(700);
 	chassis_ptr->arcade(0, 0);
 	intake.move_voltage(0);
 	wingL.set_value(false);
-	wingR.set_value(false);
+	//wingR.set_value(false);
 
 	intake.move_voltage(MAXVOLTAGE);
 	// ------------
@@ -589,7 +589,7 @@ void opcontrol()
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 
-		wingR.set_value(master.get_digital(DIGITAL_R1));
+		//wingR.set_value(master.get_digital(DIGITAL_R1));
 		wingL.set_value(master.get_digital(DIGITAL_L1));
 
 		bool buttonL2 = master.get_digital(DIGITAL_L2);
