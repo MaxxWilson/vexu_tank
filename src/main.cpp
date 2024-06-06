@@ -7,31 +7,6 @@ const int MAXVOLTAGE = 12000;
 float errorcircleradius = 10.30776406;
 std::shared_ptr<pros::Task> auton_task;
 
-unsigned int auton_start_time = 0;
-
-void checkPosition()
-{
-	return;
-	while ((chassis_ptr->getPose().y + errorcircleradius) < 78)
-	{
-		pros::delay(10);
-	}
-	printf("KILINNG============================================================\n");
-	printf("KILINNG============================================================\n");
-	printf("KILINNG============================================================\n");
-	printf("KILINNG============================================================\n");
-	printf("KILINNG============================================================\n");
-	printf("KILINNG============================================================\n");
-	auton_task->remove();
-	while (pros::competition::is_autonomous())
-	{
-		motorInit();
-		rightDrive.brake();
-		leftDrive.brake();
-		pros::delay(2);
-	}
-}
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -53,6 +28,10 @@ void checkPosition()
 //     }
 // }
 
+void printStat()
+{
+	printf("%05.1f: x: %.1f\" y: %.1f\" θ: %.1f°; imu: %.1f°; distance sensors: L: %.1fin B: %.1fin\n", pros::millis() / 1000., chassis_ptr->getPose().x, chassis_ptr->getPose().y, chassis_ptr->getPose().theta, imu_ptr2->get_rotation(), distance_left.get() / 25.4 + DIST_L_TO_CENTER, distance_back.get() / 25.4 + DIST_B_TO_CENTER);
+}
 void odomLogger()
 {
 	lemlib::Pose lastpose(0, 0, 0);
@@ -61,9 +40,7 @@ void odomLogger()
 	{
 		// print either when delta > .3 inches or > 1 deg or every 1sec
 		if (chassis_ptr->getPose().distance(lastpose) > .2 || chassis_ptr->getPose().theta - lastpose.theta > 1 || !(counter % 5))
-		{
-			std::cout << pros::millis() / 1000. << "s " << chassis_ptr->getPose().x << "in " << chassis_ptr->getPose().y << "in  " << chassis_ptr->getPose().theta << "deg imu: " << imu_ptr2->get_rotation() << "deg" << std::endl;
-		}
+			printf("%05.1f: x: %.1f\" y: %.1f\" θ: %.1f°; imu: %.1f°; distance sensors: L: %.1fin B: %.1fin\n", pros::millis() / 1000., chassis_ptr->getPose().x, chassis_ptr->getPose().y, chassis_ptr->getPose().theta, imu_ptr2->get_rotation(), distance_left.get() / 25.4 + DIST_L_TO_CENTER, distance_back.get() / 25.4 + DIST_B_TO_CENTER);
 		counter++;
 		lastpose = chassis_ptr->getPose();
 		pros::delay(200);
@@ -97,7 +74,7 @@ void initialize()
 	};
 
 	lemlib::ControllerSettings lateralController{
-		7.5, // kP
+		8.5, // kP
 		0,	 // ki
 		0,	 // kD
 		0,	 // windup range is what??
@@ -141,6 +118,8 @@ void initialize()
 	// imu_ptr2->reset( true);
 
 	pros::Task odomLog(odomLogger);
+
+	chassis_ptr->setPose(15.5, 16, 45);
 	//	pros::Task screenTask(screen);
 }
 
@@ -158,267 +137,161 @@ void disabled()
 	// }
 }
 
-void movetobar()
+void movetobar(int safe) // 0 for skills, 2 for dri cuz george
 {
-	chassis_ptr->turnToHeading(-95, 1.25 _s, false);
-	chassis_ptr->moveToPose(93, 13, -99, 3 _s, {}, false);
-	chassis_ptr->moveToPose(64, 12, -90, 8 _s, {}, false);
+	chassis_ptr->turnToHeading(255, 1.85 _s, {minSpeed : 35, earlyExitRange : 10}, false);
+
+	printf("Reached0\n");
+	chassis_ptr->moveToPose(95, 15 + safe, -90, 2 _s, {lead : .35, minSpeed : 35, earlyExitRange : 7}, false);
+	printf("Reached1\n");
+
+	chassis_ptr->moveToPose(36, 16 + safe, -90, 3 _s, {minSpeed : 40, earlyExitRange : 4}, false);
 }
 
-void subauton11()
+// pre: assume left and back sensors can see the wall and the robot is at the right angle for that (near the 0,0 corner)
+void sensorHoming()
 {
-	const int go_back_after_time = 41000 _s;
+	// assume sensor perfectly perpendicular to wall and no sine/cosine adjustment
+	lemlib::Pose pose = chassis_ptr->getPose();
+	std::cout << "OLD POSE: " << lemlib::format_as(pose) << std::endl;
+	pose.y = distance_back.get() / 25.4 + DIST_B_TO_CENTER;
+	pose.x = distance_left.get() / 25.4 + DIST_L_TO_CENTER;
+	std::cout << "NEW POSE: " << lemlib::format_as(pose) << std::endl;
+	chassis_ptr->setPose(pose);
+}
 
-	intake.move_voltage(2* MAXVOLTAGE / 3);
-	//chassis_ptr->arcade(-15, 0);
-	//tailPiston.set_value(true);
-	//for (int i = 0; i < 1; i++)
-	//{
-	//	tailMotorA.move_absolute(-120, 600);
-	//	printf("moved to -90 * 3\n");
-	//	pros::delay(500);
-	//	printf("%f\n", tailMotorA.get_position());
+void bowl_n(int n)
+{
+	chassis_ptr->arcade(-25, 0);
+	tailPiston.set_value(true);
+	pros::delay(300);
+	for (int i = 0; i < n; i++)
+	{
+		tailMotorA.move_absolute(-120, 600);
+		printf("moved to -90 * 3\n");
+		pros::delay(375);
+		printf("%f\n", tailMotorA.get_position());
 
-	//	tailMotorA.move_absolute(120, 600);
-	//	printf("moved to 0\n");
+		tailMotorA.move_absolute(120, 600);
+		printf("moved to 0\n");
 
-	//	pros::delay(500);
-	//	printf("%f\n", tailMotorA.get_position());
+		pros::delay(375);
+		printf("%f\n", tailMotorA.get_position());
 
-	//	chassis_ptr->arcade(0, 0); // it stops going backward after one loop
-	//}
-	//tailMotorA.move_absolute(0, 100);
+		chassis_ptr->arcade(0, 0); // it stops going backward after one loop
+	}
+	tailMotorA.move_absolute(0, 100);
+	pros::delay(300);
 
-	//chassis_ptr->turnToHeading(120, 2.5 _s, false);
-	//tailPiston.set_value(false);
-	//// wingR.set_value(true);
-	//chassis_ptr->moveToPoint(43, 9, 2.5 _s, {}, false);
+	tailPiston.set_value(false);
+}
+void subauton11(int bowl_num)
+{
+	bowl_n(bowl_num);
+	intake.move_voltage(2 * MAXVOLTAGE / 3);
+	chassis_ptr->turnToHeading(120, 2.5 _s, {minSpeed : 15, earlyExitRange : 10}, false);
+	// wingR.set_value(true);
+	chassis_ptr->moveToPoint(43, 9, 2.5 _s, {minSpeed : 25, earlyExitRange : 2}, false);
 
-	//////// DISABLE IF NOT NEEDED
-
-	//wingL.set_value(true);
-	//chassis_ptr->moveToPose(96, 7,80, 2.5 _s, {maxSpeed : 85}, false);
-	//TMP for hypertuning commented out all of aboete
 	wingL.set_value(true);
-	chassis_ptr->setPose(96, 7, 80);
+	chassis_ptr->moveToPose(96, 7, 80, 2.5 _s, {
+		maxSpeed : 85,
+		minSpeed : 25,
+	},
+							false);
+	//// TMP for hypertuning commented out all of aboete
+	// wingL.set_value(true);
+	// chassis_ptr->setPose(96, 7, 80);
 
 	printf("HEADING NOW \n");
 
 	// chassis_ptr->turnToHeading(45, 1 _s, false);
-	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	{
-		pros::delay(10);
-	}
-	chassis_ptr->moveToPose(136, 34, 0, 4.5 _s, {forwards : true, lead : .5, maxSpeed : 60}, false);
-	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	{
-		pros::delay(10);
-	}
+
+	chassis_ptr->moveToPose(136, 36, 0, 2.75 _s, {forwards : true, lead : .4, maxSpeed : 70, minSpeed : 30, earlyExitRange : 2}, false);
+
 	// chassis_ptr->moveToPose(118, 30, 26, 2.5 _s, {forwards : true, lead : .0, maxSpeed : 80}, false);
 
 	chassis_ptr->arcade(-47, 0);
 	pros::delay(300);
 	chassis_ptr->arcade(127, 0);
-	pros::delay(1000);
-	chassis_ptr->arcade(0, 0);
-
-	chassis_ptr->arcade(-47, 0);
-	pros::delay(700);
-
-	chassis_ptr->turnToHeading(0, 1 _s, false);
-
-	chassis_ptr->arcade(127, 0);
-	pros::delay(1000);
-	chassis_ptr->arcade(0, 0);
-
-	chassis_ptr->arcade(-47, 0);
-	pros::delay(700);
-	chassis_ptr->tank(0, 20);
-	pros::delay(700);
+	pros::delay(900);
 	chassis_ptr->arcade(0, 0);
 
 	wingL.set_value(false);
-	//wingR.set_value(false);
+	chassis_ptr->tank(15, -127);
+
+	pros::delay(600);
+	chassis_ptr->arcade(0, 0);
+
+	// wingR.set_value(false);
 }
 
-void auton1()
+void bowlloop(int bowl_num, bool extra_safe_back = false)
 {
 
-	// if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
+	subauton11(bowl_num);
+
+	chassis_ptr->turnToHeading(255, 1.75 _s, {minSpeed : 35, earlyExitRange : 10}, false);
+
+	printf("Reached0\n");
+	chassis_ptr->moveToPose(95, extra_safe_back ? 9 : 12, -95, 1.75 _s, {lead : .35, minSpeed : 35, earlyExitRange : 7}, false);
+	printf("Reached1\n");
+
+	chassis_ptr->moveToPose(36, 14, -90, 3 _s, {minSpeed : 40, earlyExitRange : 4}, false);
+
+	printf("reached1\n");
+	chassis_ptr->moveToPose(28, 28, 0, 3 _s, {lead : 0.4, minSpeed : 20, earlyExitRange : 4}, false);
+
+	printf("reached2\n");
+	sensorHoming();
+	// while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
 	//{
-	//	chassis_ptr->moveToPose(125, 26, 0, 2.5 _s, {forwards : false, lead : .0, maxSpeed : 80}, false);
-	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	//	{
-	//		pros::delay(10);
-	//	}
-	//	chassis_ptr->arcade(127, 0);
-	//	pros::delay(1000);
-	//	chassis_ptr->arcade(0, 0);
-	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	//	{
-	//		pros::delay(10);
-	//	}
+	//	pros::delay(10);
 	// }
-	// if ((pros::millis() - auton_start_time) < (go_back_after_time - 2.5 _s))
-	//{
 
-	//	chassis_ptr->turnToHeading(26 + 360 - 1 - 1, 1.25 _s, false);
-	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	//	{
-	//		pros::delay(10);
-	//	}
-	//	chassis_ptr->arcade(27, 0);
-	//	pros::delay(800);
-	//	chassis_ptr->arcade(0, 0);
-	//	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	//	{
-	//		pros::delay(10);
-	//	}
-	//}
-	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	{
-		pros::delay(10);
-	}
-	subauton11();
-
-	chassis_ptr->turnToHeading(-95, 1.85 _s, false);
-
-	chassis_ptr->moveToPose(93, 13, -99, 3 _s, {minSpeed : 20, earlyExitRange : 4}, false);
-
-	chassis_ptr->moveToPose(36, 17, -90, 3 _s, {minSpeed : 20, earlyExitRange : 4}, false);
-
-	chassis_ptr->moveToPose(24, 28, 0, 8 _s, {lead : 0.4, minSpeed : 20, earlyExitRange : 4}, false);
-
-	chassis_ptr->setPose(24, 24, 0);
-
-	chassis_ptr->moveToPose(15.5, 16, 45, 3 _s, {false}, false);
-
-	while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	{
-		pros::delay(10);
-	}
-	subauton11();
-	movetobar();
+	printf("reached3\n");
+	chassis_ptr->moveToPose(15.5, 16, 45, 3 _s, {false, minSpeed : 20, earlyExitRange : 2}, false);
+	printf("reached4\n");
 }
 
-void auton2()
-{
-	// chassis_ptr->setPose(15.5,16,45);
-	// chassis_ptr->turnToHeading()
-	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-	intake.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->moveToPose(45, 60, 15, 100000, {}, false);
-	printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
-	// chassis_ptr->moveToPoint(48, 60, 100000, {}, false);
-	intake.move_voltage(0);
-	//wingR.set_value(true);
-	wingL.set_value(true);
-	// open wings
-	chassis_ptr->moveToPoint(50, 44, 100000, {}, false);
-	//wingR.set_value(false);
-	wingL.set_value(false);
-	// close wings
-	chassis_ptr->moveToPose(15.5, 16, 45, 10000, {false}, false);
-	chassis_ptr->arcade(-40, 0);
-	pros::delay(2000);
-	chassis_ptr->arcade(0, 0);
-	auton1();
-}
-
-void auton3()
-{
-	intake.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->moveToPose(45, 54, 45, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
-
-	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
-	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
-	intake.move_voltage(MAXVOLTAGE);
-	chassis_ptr->arcade(-10, 0);
-	pros::delay(1000);
-	chassis_ptr->arcade(0, 0);
-	intake.move_voltage(0);
-
-	intake.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->turnToPoint(47, 62, 3000, {}, false);
-	chassis_ptr->moveToPoint(47, 62, 3000, {}, false);
-
-	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
-	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
-	intake.move_voltage(MAXVOLTAGE);
-	chassis_ptr->arcade(-10, 0);
-	pros::delay(1000);
-	chassis_ptr->arcade(0, 0);
-	intake.move_voltage(0);
-
-	intake.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->moveToPose(48 + 7, 56, 75, 3000, {}, false);
-
-	chassis_ptr->moveToPose(50, 44, 135, 3000, {lead : 0.6, minSpeed : 20, earlyExitRange : 4}, false);
-	chassis_ptr->turnToPoint(50, 44, 3000, {}, false);
-	chassis_ptr->moveToPoint(50, 44, 3000, {}, false);
-
-	intake.move_voltage(MAXVOLTAGE);
-	chassis_ptr->arcade(-10, 0);
-	pros::delay(1000);
-	chassis_ptr->arcade(0, 0);
-	intake.move_voltage(0);
-
-	intake.move_voltage(-MAXVOLTAGE);
-	chassis_ptr->moveToPose(48 + 10, 62, 45, 3000, {lead : .02}, false);
-
-	chassis_ptr->moveToPose(50, 44, 135, 3000, {lead : .02}, false);
-	intake.move_voltage(MAXVOLTAGE);
-
-	//	chassis_ptr->moveToPose(36, 36, 90, 3000, {lead : .6}, false);
-	//
-	//	wingR .set_value( true);
-	//	intake.move_voltage(0);
-
-	//	chassis_ptr->moveToPoint(36 + 24, 36, 3000, {}, false);
-
-	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
-	chassis_ptr->arcade(-40, 0);
-	pros::delay(500);
-	chassis_ptr->arcade(0, 0);
-}
-
-void auton4()
+void pushmiddleballsloop()
 {
 
+	printf("HI1\n");
 	tailPiston.set_value(true);
-	tailMotorA.move_absolute(-80, 100);
+	tailMotorA.move_absolute(-90, 600);
 	pros::delay(500);
 
-	tailMotorA.move_absolute(90, 100);
+	tailMotorA.move_absolute(100, 600);
 	pros::delay(500);
-	tailMotorA.move_absolute(00, 100);
+	tailMotorA.move_absolute(00, 600);
 	pros::delay(300);
 	tailPiston.set_value(false);
-
 	intake.move_voltage(-MAXVOLTAGE);
+	printf("MOVING TO POSE\n");
 	chassis_ptr->moveToPose(45, 54, 0, 5000, {lead : 0.6, minSpeed : 20, earlyExitRange : 7}, false);
 
 	chassis_ptr->turnToHeading(90, 600, false); // tmp testing
-	// chassis_ptr->moveToPose(46, 46, 90, 2000, {lead : 0.6}, false);
+												// chassis_ptr->moveToPose(46, 46, 90, 2000, {lead : 0.6}, false);
 
 	intake.move_voltage(MAXVOLTAGE);
-	wingL.set_value(false); // knocks other ball
-	//wingR.set_value(true);
-	pros::delay(300); // tiny negligible i think should do
+	wingL.set_value(1); // knocks other ball
+						// wingR.set_value(true);
+	pros::delay(300);	// tiny negligible i think should do
 	chassis_ptr->arcade(55, 0);
 	pros::delay(700);
 	chassis_ptr->arcade(0, 0);
 	intake.move_voltage(0);
 	wingL.set_value(false);
-	//wingR.set_value(false);
+	// wingR.set_value(false);
 
 	// ------------------------------------------
 	intake.move_voltage(-MAXVOLTAGE);
 	// chassis_ptr->moveToPose(48+10, 48 + 12 + 5, -30, 5000, {lead : 0.6}, false);
 	chassis_ptr->moveToPoint(48, 48, 2500, {false}, false);
-	chassis_ptr->turnToHeading(0, 1000, {minSpeed : 1, earlyExitRange : 10}, false);
+	chassis_ptr->turnToHeading(0, 1000, {minSpeed : 20, earlyExitRange : 10}, false);
 
-	chassis_ptr->moveToPose(45, 61, 0, 1500, {lead : 0.6}, false);
+	chassis_ptr->moveToPose(45, 61, 0, 11500, {lead : 0.6}, false);
 	chassis_ptr->arcade(-20, 0);
 	pros::delay(400);
 	chassis_ptr->arcade(0, 0);
@@ -426,20 +299,57 @@ void auton4()
 
 	intake.move_voltage(MAXVOLTAGE);
 	wingL.set_value(true);
-	//wingR.set_value(true);
+	// wingR.set_value(true);
 	pros::delay(300);
 	chassis_ptr->arcade(55, 0);
 	pros::delay(700);
 	chassis_ptr->arcade(0, 0);
 	intake.move_voltage(0);
 	wingL.set_value(false);
-	//wingR.set_value(false);
+	// wingR.set_value(false);
 
 	intake.move_voltage(MAXVOLTAGE);
 	// ------------
 	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
+}
 
-	auton1();
+void pushmiddleballsloop_skills()
+{
+
+	printf("HI1\n");
+	tailPiston.set_value(true);
+	tailMotorA.move_absolute(-90, 600);
+	pros::delay(500);
+
+	tailMotorA.move_absolute(100, 600);
+	pros::delay(500);
+	tailMotorA.move_absolute(00, 600);
+	pros::delay(300);
+	tailPiston.set_value(false);
+	intake.move_voltage(-MAXVOLTAGE);
+	printf("MOVING TO POSE\n");
+
+	chassis_ptr->moveToPose(42, 75, 0, 3500, {lead : 0.6, minSpeed : 15, earlyExitRange : 4}, false);
+	chassis_ptr->turnToHeading(90, 1000, {minSpeed : 15, earlyExitRange : 10}, false);
+
+	wingL.set_value(true);
+	intake.move_voltage(MAXVOLTAGE);
+	chassis_ptr->arcade(-50, 0);
+	pros::delay(350);
+	chassis_ptr->arcade(75, 0);
+	pros::delay(800);
+	chassis_ptr->arcade(0, 0);
+	intake.move_voltage(0);
+	wingL.set_value(false);
+	// wingR.set_value(false);
+
+	intake.move_voltage(MAXVOLTAGE);
+	// ------------
+
+	// chassis_ptr->moveToPose(24, 24, -90, 3 _s, {forwards: false, lead: -.6, minSpeed : 20, earlyExitRange : 4}, false);
+
+	// sensorHoming();
+	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
 }
 
 /**
@@ -466,36 +376,85 @@ void competition_initialize()
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
+void release_intake_fold()
+{
+	intake.move_voltage(-MAXVOLTAGE);
+	pros::delay(300);
+	intake.move_voltage(0);
+}
+
+void climbatend()
+{
+	// wait till the end of driver control, and close lift no matter what, saves us in case of half climb
+	pros::delay(74.5 _s);
+	lift.set_value(0);
+}
+
 void actual_auton()
 {
+	const bool skills = false;
 
-	auton_start_time = pros::millis();
-	chassis_ptr->setPose(15.5, 16, 45);
+	static bool first = false;
+	if (skills) // skills
+	{
+		release_intake_fold();
+		bowlloop(6);
+		bowlloop(6);
+		subauton11(6);
+		lift.set_value(1);
+		movetobar(0);
+		lift.set_value(0);
+	}
+	else
+	{
+		if (!first) // isolation mode
+		{
+			first = true;
+			printf("===========================START AUTON======================\n");
+			printStat();
+			release_intake_fold();
+			pushmiddleballsloop();
+			bowlloop(6, true);
+			bowl_n(10);
 
-	// auton1();
-	// return;
+			printf("===========================END AUTON======================\n");
+			printStat();
+		}
+		else // interactive mode
+		{
+			pros::Task whatev(climbatend);
 
-	// chassis_ptr->moveToPose(45, 54, 45, 10000, {lead : 0.2}, false);
+			printf("===========================START DRIVE======================\n");
+			printStat();
 
-	// chassis_ptr->turnToPoint(20, 20, 10000, {}, false);
-	// chassis_ptr->moveToPoint(20, 20, 10000, {}, false);
-	// chassis_ptr->turnToPoint(30, 30, 10000, {}, false);
-	// chassis_ptr->moveToPoint(30, 30, 10000, {}, false);
+			bowlloop(3); // already have some from auton, don't need that many more in driver
+			bowlloop(6);
+			{ // one option, delay and then bowl
+				pros::delay(15 _s);
+				subauton11(6);
+			}
+			//{ // other opt, save time, bowl while george climbing, and then push them after
+			// // untested, but likely to work code
+			//	pros::Task task{[=]
+			//					{
+			//						bowl_n(6);
+			//					}};
+			//	pros::delay(15 _s);
+			//	subauton11(0);
+			//}
+			lift.set_value(1);
+			movetobar(2);
+			lift.set_value(0);
 
-	// return;
-	//  chassis_ptr->moveToPose(16, 80, 45, 10000, {false}, false);
-	auton1();
-	//  auton2();
-	// auton3();
-	// auton4();
+			printf("===========================END DRIVE======================\n");
+			printStat();
+		}
+	}
 }
-ASSET(path_txt)
-using namespace Auton;
 void autonomous()
 {
-
-	pros::Task t(checkPosition);
-	auton_task = std::make_shared<pros::Task>(actual_auton);
+	actual_auton();
 }
 
 // Make a function for setting the geofencing parameters
@@ -589,7 +548,7 @@ void opcontrol()
 		double leftVoltage = leftSpeed * MAXVOLTAGE;
 		double rightVoltage = rightSpeed * MAXVOLTAGE;
 
-		//wingR.set_value(master.get_digital(DIGITAL_R1));
+		// wingR.set_value(master.get_digital(DIGITAL_R1));
 		wingL.set_value(master.get_digital(DIGITAL_L1));
 
 		bool buttonL2 = master.get_digital(DIGITAL_L2);

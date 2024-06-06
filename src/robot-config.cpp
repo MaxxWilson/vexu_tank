@@ -41,6 +41,12 @@ pros::ADIDigitalOut tailPiston = pros::ADIDigitalOut('E');
 pros::ADIDigitalOut lift = pros::ADIDigitalOut('C');
 pros::ADIDigitalIn climb_switch = pros::ADIDigitalIn('A');
 
+pros::Distance distance_back = pros::Distance(11);
+pros::Distance distance_left = pros::Distance(9);
+const double DIST_L_TO_CENTER = 5.5 + .8;
+const double DIST_B_TO_CENTER = 5.5 + .9; // totally a coincidence that they're the same
+
+
 std::vector<pros::Motor> motorList = {
 	leftDriveMotorA,
 	leftDriveMotorB,

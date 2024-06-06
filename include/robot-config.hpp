@@ -35,7 +35,10 @@ extern pros::ADIDigitalOut wingR;
 extern pros::ADIDigitalOut lift;
 extern pros::ADIDigitalOut tailPiston;
 extern pros::ADIDigitalIn climb_switch;
-
+extern pros::Distance distance_back;
+extern pros::Distance distance_left;
+extern const double DIST_L_TO_CENTER;
+extern const double DIST_B_TO_CENTER;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

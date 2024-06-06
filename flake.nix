@@ -55,6 +55,8 @@
           		echo -n Ready to win Worlds, Champ? 
           		export MAKEFLAGS="-j $((`nproc` - 1))"
 			alias mut="pros --no-sentry --no-analytics mut --after run"
+			alias mu="pros --no-sentry --no-analytics mu"
+			alias t="pros --no-sentry --no-analytics t"
         '';
       };
       formatter.${system} = pkgs.nixpkgs-fmt;
