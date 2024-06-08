@@ -138,7 +138,7 @@ void disabled()
 	// }
 }
 
-void movetobar(int safe) // 0 for skills, 2 for dri cuz george
+void movetobar_from_top(int safe) // 0 for skills, 2 for dri cuz george
 {
 	chassis_ptr->moveToPose(97, 13 + safe, -90, 2.25 _s, {lead : .40, minSpeed : 35, earlyExitRange : 5}, false);
 	printf("Reached1\n");
@@ -149,7 +149,7 @@ void movetobar(int safe) // 0 for skills, 2 for dri cuz george
 }
 
 // pre: assume left and back sensors can see the wall and the robot is at the right angle for that (near the 0,0 corner)
-void sensorHoming()
+void sensorHomingBottomRight()
 {
 	// assume sensor perfectly perpendicular to wall and no sine/cosine adjustment
 	lemlib::Pose pose = chassis_ptr->getPose();
@@ -160,7 +160,7 @@ void sensorHoming()
 	chassis_ptr->setPose(pose);
 }
 // pre: assume left and back sensors can see the wall and the robot is at the right angle for that (near the 0,0 corner)
-void sensorHoming2()
+void sensorHomingTopRight()
 {
 	// assume sensor perfectly perpendicular to wall and no sine/cosine adjustment
 	lemlib::Pose pose = chassis_ptr->getPose();
@@ -236,13 +236,28 @@ void subauton11(int bowl_num)
 
 	// wingR.set_value(false);
 	chassis_ptr->turnToHeading(270, 1.75 _s, {minSpeed : 20, earlyExitRange : 2}, false);
-	sensorHoming2();
+	sensorHomingTopRight();
 }
 
-void bowlloop(int bowl_num, int safe = 0)
+void from_alley_to_home()
 {
+	printf("reached1\n");
+	chassis_ptr->moveToPose(28, 28, 0, 3 _s, {lead : 0.4, minSpeed : 20, earlyExitRange : 4}, false);
 
-	subauton11(bowl_num);
+	printf("reached2\n");
+	sensorHomingBottomRight();
+	// while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
+	//{
+	//	pros::delay(10);
+	// }
+
+	printf("reached3\n");
+	chassis_ptr->moveToPose(15.5, 16, 45, 3 _s, {false, minSpeed : 20, earlyExitRange : 2}, false);
+	printf("reached4\n");
+}
+
+void from_goal_to_alley(int safe = 0)
+{
 
 	printf("Reached0\n");
 	chassis_ptr->moveToPose(97, 9 - safe, -85, 2.25 _s, {lead : .40, minSpeed : 35, earlyExitRange : 5}, false);
@@ -252,20 +267,18 @@ void bowlloop(int bowl_num, int safe = 0)
 	printf("Reached1\n");
 
 	chassis_ptr->moveToPose(36, 14, -90, 3 _s, {minSpeed : 40, earlyExitRange : 4}, false);
+}
 
-	printf("reached1\n");
-	chassis_ptr->moveToPose(28, 28, 0, 3 _s, {lead : 0.4, minSpeed : 20, earlyExitRange : 4}, false);
+void from_goal_to_home()
+{
+	from_goal_to_alley();
+	from_alley_to_home();
+}
 
-	printf("reached2\n");
-	sensorHoming();
-	// while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN))
-	//{
-	//	pros::delay(10);
-	// }
-
-	printf("reached3\n");
-	chassis_ptr->moveToPose(15.5, 16, 45, 3 _s, {false, minSpeed : 20, earlyExitRange : 2}, false);
-	printf("reached4\n");
+void bowlloop(int bowl_num)
+{
+	subauton11(bowl_num);
+	from_goal_to_home();
 }
 
 void pushmiddleballsloop()
@@ -327,45 +340,6 @@ void pushmiddleballsloop()
 	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
 }
 
-void pushmiddleballsloop_skills()
-{
-
-	printf("HI1\n");
-	tailPiston.set_value(true);
-	tailMotorA.move_absolute(-90, 600);
-	pros::delay(500);
-
-	tailMotorA.move_absolute(100, 600);
-	pros::delay(500);
-	tailMotorA.move_absolute(00, 600);
-	pros::delay(300);
-	tailPiston.set_value(false);
-	intake.move_voltage(-MAXVOLTAGE);
-	printf("MOVING TO POSE\n");
-
-	chassis_ptr->moveToPose(42, 75, 0, 3500, {lead : 0.6, minSpeed : 15, earlyExitRange : 4}, false);
-	chassis_ptr->turnToHeading(90, 1000, {minSpeed : 15, earlyExitRange : 10}, false);
-
-	wingL.set_value(true);
-	intake.move_voltage(MAXVOLTAGE);
-	chassis_ptr->arcade(-50, 0);
-	pros::delay(350);
-	chassis_ptr->arcade(75, 0);
-	pros::delay(800);
-	chassis_ptr->arcade(0, 0);
-	intake.move_voltage(0);
-	wingL.set_value(false);
-	// wingR.set_value(false);
-
-	intake.move_voltage(MAXVOLTAGE);
-	// ------------
-
-	// chassis_ptr->moveToPose(24, 24, -90, 3 _s, {forwards: false, lead: -.6, minSpeed : 20, earlyExitRange : 4}, false);
-
-	// sensorHoming();
-	chassis_ptr->moveToPose(15.5, 16, 45, 3000, {false}, false);
-}
-
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
  * Management System or the VEX Competition Switch. This is intended for
@@ -424,8 +398,8 @@ void actual_auton()
 		bowlloop(7);
 		subauton11(7);
 		lift.set_value(1);
-		movetobar(0);
-		//lift.set_value(0);
+		movetobar_from_top(0);
+		// lift.set_value(0);
 	}
 	else
 	{
@@ -434,10 +408,15 @@ void actual_auton()
 			first = true;
 			printf("===========================START AUTON======================\n");
 			printStat();
+
 			release_intake_fold();
-			pushmiddleballsloop();
-			bowlloop(8);
-			bowl_n(10);
+
+			chassis_ptr->setPose(48, 12, -90);
+			from_alley_to_home();
+
+			bowlloop(6);
+
+			subauton11(6);
 
 			printf("===========================END AUTON======================\n");
 			printStat();
@@ -449,27 +428,16 @@ void actual_auton()
 			printf("===========================START DRIVE======================\n");
 			printStat();
 
-			bowlloop(3); // already have some from auton, don't need that many more in driver
-			bowlloop(6);
-			//{ // one option, delay and then bowl
-			//	pros::delay(15 _s);
-			//	subauton11(6);
-			//}
-			//{ // other opt, save time, bowl while george climbing, and then push them after
-			// // untested, but likely to work code
-			//	pros::Task task{[=]
-			//					{
-			//						bowl_n(6);
-			//					}};
-			//	pros::delay(15 _s);
-			//	subauton11(0);
-			//}
-			{ // no george so just run
-				subauton11(6);
+			from_goal_to_home();
+
+			// 12 balls left now
+			bowlloop(7); // already have some from auton, don't need that many more in driver
+			{			 // no george so just run
+				subauton11(7);
 			}
 			lift.set_value(1);
-			movetobar(0);
-			//lift.set_value(0);
+			movetobar_from_top(0);
+			// lift.set_value(0);
 
 			printf("===========================END DRIVE======================\n");
 			printStat();
