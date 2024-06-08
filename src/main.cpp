@@ -1,6 +1,7 @@
 #include "lemlib/api.hpp"
 #include "main.hpp"
 #include "robot-config.hpp"
+#include "skills.cpp"
 
 const int MAXVOLTAGE = 12000;
 #define _s *1000
@@ -139,13 +140,12 @@ void disabled()
 
 void movetobar(int safe) // 0 for skills, 2 for dri cuz george
 {
-	chassis_ptr->turnToHeading(255, 1.85 _s, {minSpeed : 35, earlyExitRange : 10}, false);
-
-	printf("Reached0\n");
-	chassis_ptr->moveToPose(95, 15 + safe, -90, 2 _s, {lead : .35, minSpeed : 35, earlyExitRange : 7}, false);
+	chassis_ptr->moveToPose(97, 13 + safe, -90, 2.25 _s, {lead : .40, minSpeed : 35, earlyExitRange : 5}, false);
 	printf("Reached1\n");
 
-	chassis_ptr->moveToPose(36, 16 + safe, -90, 3 _s, {minSpeed : 40, earlyExitRange : 4}, false);
+	chassis_ptr->arcade(80, 0);
+	pros::delay(3000);
+	chassis_ptr->arcade(0, 0);
 }
 
 // pre: assume left and back sensors can see the wall and the robot is at the right angle for that (near the 0,0 corner)
@@ -156,6 +156,17 @@ void sensorHoming()
 	std::cout << "OLD POSE: " << lemlib::format_as(pose) << std::endl;
 	pose.y = distance_back.get() / 25.4 + DIST_B_TO_CENTER;
 	pose.x = distance_left.get() / 25.4 + DIST_L_TO_CENTER;
+	std::cout << "NEW POSE: " << lemlib::format_as(pose) << std::endl;
+	chassis_ptr->setPose(pose);
+}
+// pre: assume left and back sensors can see the wall and the robot is at the right angle for that (near the 0,0 corner)
+void sensorHoming2()
+{
+	// assume sensor perfectly perpendicular to wall and no sine/cosine adjustment
+	lemlib::Pose pose = chassis_ptr->getPose();
+	std::cout << "OLD POSE: " << lemlib::format_as(pose) << std::endl;
+	pose.x = 144 - (distance_back.get() / 25.4 + DIST_B_TO_CENTER);
+	pose.y = (distance_left.get() / 25.4 + DIST_L_TO_CENTER);
 	std::cout << "NEW POSE: " << lemlib::format_as(pose) << std::endl;
 	chassis_ptr->setPose(pose);
 }
@@ -224,17 +235,20 @@ void subauton11(int bowl_num)
 	chassis_ptr->arcade(0, 0);
 
 	// wingR.set_value(false);
+	chassis_ptr->turnToHeading(270, 1.75 _s, {minSpeed : 20, earlyExitRange : 2}, false);
+	sensorHoming2();
 }
 
-void bowlloop(int bowl_num, bool extra_safe_back = false)
+void bowlloop(int bowl_num, int safe = 0)
 {
 
 	subauton11(bowl_num);
 
-	chassis_ptr->turnToHeading(255, 1.75 _s, {minSpeed : 35, earlyExitRange : 10}, false);
-
 	printf("Reached0\n");
-	chassis_ptr->moveToPose(95, extra_safe_back ? 9 : 12, -95, 1.75 _s, {lead : .35, minSpeed : 35, earlyExitRange : 7}, false);
+	chassis_ptr->moveToPose(97, 9 - safe, -85, 2.25 _s, {lead : .40, minSpeed : 35, earlyExitRange : 5}, false);
+	chassis_ptr->arcade(-20, 0);
+	pros::delay(400);
+	chassis_ptr->arcade(0, 0);
 	printf("Reached1\n");
 
 	chassis_ptr->moveToPose(36, 14, -90, 3 _s, {minSpeed : 40, earlyExitRange : 4}, false);
@@ -291,7 +305,7 @@ void pushmiddleballsloop()
 	chassis_ptr->moveToPoint(48, 48, 2500, {false}, false);
 	chassis_ptr->turnToHeading(0, 1000, {minSpeed : 20, earlyExitRange : 10}, false);
 
-	chassis_ptr->moveToPose(45, 61, 0, 11500, {lead : 0.6}, false);
+	chassis_ptr->moveToPose(45, 61, 0, 1500, {lead : 0.6}, false);
 	chassis_ptr->arcade(-20, 0);
 	pros::delay(400);
 	chassis_ptr->arcade(0, 0);
@@ -391,20 +405,27 @@ void climbatend()
 	lift.set_value(0);
 }
 
+void climbatendskills()
+{
+	pros::delay(59.7 _s);
+	lift.set_value(0);
+}
+
 void actual_auton()
 {
-	const bool skills = false;
 
 	static bool first = false;
 	if (skills) // skills
 	{
+
+		pros::Task whatev(climbatendskills);
 		release_intake_fold();
-		bowlloop(6);
-		bowlloop(6);
-		subauton11(6);
+		bowlloop(5);
+		bowlloop(7);
+		subauton11(7);
 		lift.set_value(1);
 		movetobar(0);
-		lift.set_value(0);
+		//lift.set_value(0);
 	}
 	else
 	{
@@ -415,7 +436,7 @@ void actual_auton()
 			printStat();
 			release_intake_fold();
 			pushmiddleballsloop();
-			bowlloop(6, true);
+			bowlloop(8);
 			bowl_n(10);
 
 			printf("===========================END AUTON======================\n");
@@ -430,10 +451,10 @@ void actual_auton()
 
 			bowlloop(3); // already have some from auton, don't need that many more in driver
 			bowlloop(6);
-			{ // one option, delay and then bowl
-				pros::delay(15 _s);
-				subauton11(6);
-			}
+			//{ // one option, delay and then bowl
+			//	pros::delay(15 _s);
+			//	subauton11(6);
+			//}
 			//{ // other opt, save time, bowl while george climbing, and then push them after
 			// // untested, but likely to work code
 			//	pros::Task task{[=]
@@ -443,9 +464,12 @@ void actual_auton()
 			//	pros::delay(15 _s);
 			//	subauton11(0);
 			//}
+			{ // no george so just run
+				subauton11(6);
+			}
 			lift.set_value(1);
-			movetobar(2);
-			lift.set_value(0);
+			movetobar(0);
+			//lift.set_value(0);
 
 			printf("===========================END DRIVE======================\n");
 			printStat();

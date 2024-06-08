@@ -57,6 +57,13 @@
 			alias mut="pros --no-sentry --no-analytics mut --after run"
 			alias mu="pros --no-sentry --no-analytics mu"
 			alias t="pros --no-sentry --no-analytics t"
+
+function both() {
+echo 'const bool skills = true;' > src/skills.cpp
+pros mu --slot 2 --name skills
+echo 'const bool skills = false;' > src/skills.cpp
+pros mu --slot 1 --name match
+}
         '';
       };
       formatter.${system} = pkgs.nixpkgs-fmt;
